@@ -1,0 +1,125 @@
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f7fb; }
+
+.layout {
+  display: flex;
+  height: 100vh;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.sidebar {
+  width: 220px;
+  background: #0f172a;
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar a {
+  color: #cbd5f5;
+  text-decoration: none;
+  padding: .4rem .6rem;
+  border-radius: 6px;
+}
+
+.sidebar a.active,
+.sidebar a:hover {
+  background: #1e293b;
+  color: white;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  table-layout: fixed; /* 🔑 clave */
+}
+
+.table thead {
+  background: #f1f5f9;
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table th {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  text-transform: uppercase;
+}
+
+.table tbody tr {
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.table tbody tr.active {
+  background: #e0e7ff;
+}
+
+/* Column widths */
+.col-id {
+  width: 80px;
+}
+
+.col-order {
+  width: 100px;
+  text-align: center;
+}
+
+.col-name {
+  width: auto;
+}
+
+.editor {
+  margin-top: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.editor input,
+.editor textarea {
+  padding: .5rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+}
+
+.editor button {
+  margin-top: .5rem;
+  align-self: flex-start;
+  padding: .5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.editor button:hover {
+  background: #1d4ed8;
+}
