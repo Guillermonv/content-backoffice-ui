@@ -1,7 +1,18 @@
+/* ======================
+   Global
+====================== */
+* {
+  box-sizing: border-box;
+}
 
-* { box-sizing: border-box; }
-body { margin: 0; background: #f5f7fb; }
+body {
+  margin: 0;
+  background: #f5f7fb;
+}
 
+/* ======================
+   Layout
+====================== */
 .layout {
   display: flex;
   height: 100vh;
@@ -21,7 +32,7 @@ body { margin: 0; background: #f5f7fb; }
 .sidebar a {
   color: #cbd5f5;
   text-decoration: none;
-  padding: .4rem .6rem;
+  padding: 0.4rem 0.6rem;
   border-radius: 6px;
 }
 
@@ -36,13 +47,34 @@ body { margin: 0; background: #f5f7fb; }
   padding: 2rem;
 }
 
+/* ======================
+   Workflow dropdown
+====================== */
+.workflow-filter {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.workflow-filter select {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+}
+
+/* ======================
+   Table
+====================== */
 .table {
   width: 100%;
   border-collapse: collapse;
   background: white;
   border-radius: 10px;
   overflow: hidden;
-  table-layout: fixed; /* 🔑 clave */
+  table-layout: fixed;
 }
 
 .table thead {
@@ -93,6 +125,13 @@ body { margin: 0; background: #f5f7fb; }
   width: auto;
 }
 
+.col-agent {
+  width: 140px;
+}
+
+/* ======================
+   Editor
+====================== */
 .editor {
   margin-top: 2rem;
   background: white;
@@ -100,26 +139,59 @@ body { margin: 0; background: #f5f7fb; }
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
+}
+
+.editor h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .editor input,
 .editor textarea {
-  padding: .5rem;
+  padding: 0.5rem;
   border-radius: 6px;
   border: 1px solid #cbd5e1;
 }
 
 .editor button {
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   align-self: flex-start;
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   background: #2563eb;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
+
 .editor button:hover {
   background: #1d4ed8;
+}
+
+/* ======================
+   Save checkmark
+====================== */
+.saved-check {
+  color: #22c55e;
+  font-size: 1.2rem;
+  animation: pop 0.2s ease-in-out;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.editor select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
 }
