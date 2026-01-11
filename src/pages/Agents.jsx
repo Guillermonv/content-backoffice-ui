@@ -18,7 +18,9 @@ export default function Agents() {
 
   const loadAgents = async () => {
     const res = await fetch(`${API_BASE_URL}/agents`, {
-      headers: { Authorization: `Bearer ${API_TOKEN}` },
+      headers: {
+        Authorization: `Bearer ${API_TOKEN}`,
+      },
     });
     setAgents(await res.json());
   };
@@ -53,6 +55,21 @@ export default function Agents() {
     setEditingId(null);
   };
 
+  const deleteAgent = async (id) => {
+    const ok = window.confirm("Delete this agent?");
+    if (!ok) return;
+
+    await fetch(`${API_BASE_URL}/agents/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${API_TOKEN}`,
+      },
+    });
+
+    // optimistic update
+    setAgents((prev) => prev.filter((a) => a.ID !== id));
+  };
+
   return (
     <div>
       <h1>Agents</h1>
@@ -66,6 +83,7 @@ export default function Agents() {
             <th className="col-order">Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {agents.map((a) => {
             const editing = editingId === a.ID;
@@ -110,13 +128,23 @@ export default function Agents() {
 
                 <td className="col-order">
                   {!editing ? (
-                    <button
-                      onClick={() => startEdit(a)}
-                      style={iconButton}
-                      title="Edit"
-                    >
-                      ✏️
-                    </button>
+                    <>
+                      <button
+                        onClick={() => startEdit(a)}
+                        style={iconButton}
+                        title="Edit"
+                      >
+                        ✏️
+                      </button>
+
+                      <button
+                        onClick={() => deleteAgent(a.ID)}
+                        style={{ ...iconButton, color: "#d33" }}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </>
                   ) : (
                     <>
                       <button
@@ -126,6 +154,7 @@ export default function Agents() {
                       >
                         ✔️
                       </button>
+
                       <button
                         onClick={cancelEdit}
                         style={iconButton}
