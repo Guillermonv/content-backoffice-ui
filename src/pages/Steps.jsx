@@ -185,17 +185,18 @@ export default function Steps() {
         </div>
 
         <div className="steps-header-center">
-          <select
-            value={workflowFilter}
-            onChange={e => setWorkflowFilter(e.target.value)}
-          >
-            <option value="all">All workflows</option>
-            {workflows.map(w => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
+        <select
+          className="select-primary"
+          value={workflowFilter}
+          onChange={e => setWorkflowFilter(e.target.value)}
+        >
+          <option value="all">All workflows</option>
+          {workflows.map(w => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
+        </select>
         </div>
 
         <div className="steps-header-right" />
@@ -287,47 +288,58 @@ export default function Steps() {
       {/* Table */}
       {/* ====================== */}
       <table className="table">
-        <thead>
+      <thead>
           <tr>
             <th className="col-id">ID</th>
             <th>Name</th>
+            <th>Workflow</th> {/* 👈 nueva */}
             <th className="col-order">Order</th>
             <th>Agent</th>
             <th className="col-order">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {filteredSteps.map(s => (
-            <tr
-              key={s.id}
-              className={selected?.id === s.id ? "active" : ""}
-              onClick={() => {
-                setSelected({ ...s })
-                setSelectedAgentId(
-                  s.agent?.id ? String(s.agent.id) : ""
-                )
-                setError(null)
+
+            <tbody>
+      {filteredSteps.map(s => (
+        <tr
+          key={s.id}
+          className={selected?.id === s.id ? "active" : ""}
+          onClick={() => {
+            setSelected({ ...s })
+            setSelectedAgentId(
+              s.agent?.id ? String(s.agent.id) : ""
+            )
+            setError(null)
+          }}
+        >
+          <td>{s.id}</td>
+          <td>{s.name}</td>
+
+          {/* 👇 NUEVA COLUMNA */}
+          <td>
+            <span className="badge-workflow">
+              {s.workflow?.name || "-"}
+            </span>
+          </td>
+
+          <td>{s.orderIndex}</td>
+          <td>{s.agent?.provider || "-"}</td>
+          <td>
+            <button
+              className="btn-icon danger"
+              onClick={e => {
+                e.stopPropagation()
+                deleteStep(s.id)
               }}
+              title="Delete"
             >
-              <td>{s.id}</td>
-              <td>{s.name}</td>
-              <td>{s.orderIndex}</td>
-              <td>{s.agent?.provider || "-"}</td>
-              <td>
-                <button
-                  className="btn-icon danger"
-                  onClick={e => {
-                    e.stopPropagation()
-                    deleteStep(s.id)
-                  }}
-                  title="Delete"
-                >
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+              🗑️
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+
       </table>
 
       {/* ====================== */}
