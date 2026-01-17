@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 const API = import.meta.env.VITE_API_BASE_URL
 const TOKEN = import.meta.env.VITE_API_TOKEN
@@ -14,6 +14,8 @@ export default function Steps() {
   const [selectedAgentId, setSelectedAgentId] = useState("")
 
   const [showCreate, setShowCreate] = useState(false)
+  const [expanded, setExpanded] = useState({})
+
   const [createForm, setCreateForm] = useState({
     name: "",
     orderIndex: 1,
@@ -207,6 +209,10 @@ export default function Steps() {
       : loadStepsByWorkflow(workflowFilter)
   }
 
+  const toggleExpand = id => {
+    setExpanded(e => ({ ...e, [id]: !e[id] }))
+  }
+
   /* ======================
      RENDER
   ====================== */
@@ -249,99 +255,11 @@ export default function Steps() {
         <div className="steps-header-right" />
       </div>
 
-      {/* Create */}
-      {showCreate && (
-        <section className="editor">
-          <h3>Create Step</h3>
-
-          {error && <div className="error">{error}</div>}
-
-          <label>Name</label>
-          <input
-            value={createForm.name}
-            onChange={e =>
-              setCreateForm({ ...createForm, name: e.target.value })
-            }
-          />
-
-          <label>Order</label>
-          <input
-            type="number"
-            value={createForm.orderIndex}
-            onChange={e =>
-              setCreateForm({
-                ...createForm,
-                orderIndex: Number(e.target.value)
-              })
-            }
-          />
-
-          <label>Operation Type</label>
-          <input
-            value={createForm.operationType}
-            onChange={e =>
-              setCreateForm({
-                ...createForm,
-                operationType: e.target.value
-              })
-            }
-          />
-
-          <label>Workflow</label>
-          <select
-            value={createForm.workflowId}
-            onChange={e =>
-              setCreateForm({
-                ...createForm,
-                workflowId: e.target.value
-              })
-            }
-          >
-            <option value="">Select workflow</option>
-            {workflows.map(w => (
-              <option key={w.ID} value={w.ID}>
-                {w.Name}
-              </option>
-            ))}
-          </select>
-
-          <label>Agent (optional)</label>
-          <select
-            value={createForm.agentId}
-            onChange={e =>
-              setCreateForm({
-                ...createForm,
-                agentId: e.target.value
-              })
-            }
-          >
-            <option value="">None</option>
-            {agents.map(a => (
-              <option key={a.id} value={a.id}>
-                {a.provider}
-              </option>
-            ))}
-          </select>
-
-          <label>Prompt</label>
-          <textarea
-            rows="6"
-            value={createForm.prompt}
-            onChange={e =>
-              setCreateForm({ ...createForm, prompt: e.target.value })
-            }
-          />
-
-          <button className="btn-primary" onClick={createStep}>
-            Create
-          </button>
-        </section>
-      )}
-
       {/* Table */}
       <table className="table">
         <thead>
           <tr>
+            <th style={{ width: 50 }} />
             {[
               ["id", "ID"],
               ["name", "Name"],
@@ -363,41 +281,104 @@ export default function Steps() {
         </thead>
 
         <tbody>
-          {steps.map(s => (
-            <tr
-              key={s.id}
-              className={selected?.id === s.id ? "active" : ""}
-              onClick={() => {
-                setSelected({ ...s })
-                setSelectedAgentId(
-                  s.agent?.id ? String(s.agent.id) : ""
-                )
-                setError(null)
-              }}
-            >
-              <td>{s.id}</td>
-              <td>{s.name}</td>
-              <td>{s.operationType}</td>
-              <td>{s.orderIndex}</td>
-              <td>{s.agent?.provider || "-"}</td>
-              <td>
-                <span className="badge-workflow">
-                  {s.workflow?.name}
-                </span>
-              </td>
-              <td>
-                <button
-                  className="btn-icon danger"
-                  onClick={e => {
-                    e.stopPropagation()
-                    deleteStep(s.id)
+          {steps.map(s => {
+            const isOpen = expanded[s.id]
+
+            return (
+              <>
+                <tr
+                  key={s.id}
+                  className={selected?.id === s.id ? "active" : ""}
+                  onClick={() => {
+                    setSelected({ ...s })
+                    setSelectedAgentId(
+                      s.agent?.id ? String(s.agent.id) : ""
+                    )
+                    setError(null)
                   }}
                 >
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          ))}
+                  <td>
+                    <button
+                      className="btn-icon"
+                      onClick={e => {
+                        e.stopPropagation()
+                        toggleExpand(s.id)
+                      }}
+                    >
+                      {isOpen ? "▾" : "▸"}
+                    </button>
+                  </td>
+
+                  <td>{s.id}</td>
+                  <td>{s.name}</td>
+                  <td>{s.operationType}</td>
+                  <td>{s.orderIndex}</td>
+                  <td>{s.agent?.provider || "-"}</td>
+
+                  <td>
+                    <span className="badge-workflow">
+                      {s.workflow?.name}
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      className="btn-icon"
+                      onClick={e => {
+                        e.stopPropagation()
+                        setSelected({ ...s })
+                        setSelectedAgentId(
+                          s.agent?.id ? String(s.agent.id) : ""
+                        )
+                      }}
+                    >
+                      ✏️
+                    </button>
+
+                    <button
+                      className="btn-icon danger"
+                      onClick={e => {
+                        e.stopPropagation()
+                        deleteStep(s.id)
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+
+                {isOpen && (
+                  <tr>
+                    <td colSpan={8}>
+                      <div className="editor" style={{ margin: 0 }}>
+                        <label>Name</label>
+                        <input value={s.name} disabled />
+
+                        <label>Order</label>
+                        <input value={s.orderIndex} disabled />
+
+                        <label>Operation Type</label>
+                        <input value={s.operationType} disabled />
+
+                        <label>Agent</label>
+                        <input
+                          value={s.agent?.provider || "None"}
+                          disabled
+                        />
+
+                        <label>Prompt</label>
+                        <textarea
+                          rows="6"
+                          value={s.prompt || ""}
+                          disabled
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            )
+          })}
         </tbody>
       </table>
 
