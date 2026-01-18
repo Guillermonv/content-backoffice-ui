@@ -6,6 +6,7 @@ const TOKEN = import.meta.env.VITE_API_TOKEN
 export default function Steps() {
   const [steps, setSteps] = useState([])
   const [agents, setAgents] = useState([])
+  const [workflows, setWorkflows] = useState([])
 
   const [expanded, setExpanded] = useState({})
   const [editingId, setEditingId] = useState(null)
@@ -35,7 +36,6 @@ export default function Steps() {
     const res = await fetch(`${API}/agents`, {
       headers: { Authorization: `Bearer ${TOKEN}` }
     })
-
     const data = await res.json()
 
     setAgents(
@@ -46,8 +46,26 @@ export default function Steps() {
     )
   }
 
+  const loadWorkflows = async () => {
+    const res = await fetch(`${API}/workflows`, {
+      headers: { Authorization: `Bearer ${TOKEN}` }
+    })
+    const data = await res.json()
+
+    setWorkflows(
+      data.map(w => ({
+        id: w.ID,
+        name: w.Name
+      }))
+    )
+  }
+
   const loadAll = async () => {
-    await Promise.all([loadSteps(), loadAgents()])
+    await Promise.all([
+      loadSteps(),
+      loadAgents(),
+      loadWorkflows()
+    ])
   }
 
   useEffect(() => {
@@ -74,7 +92,7 @@ export default function Steps() {
       name: step.name,
       orderIndex: step.orderIndex,
       operationType: step.operationType,
-      workflowId: step.workflow?.id,
+      workflowId: step.workflow?.id || "",
       agentId: step.agent?.id || "",
       prompt: step.prompt || ""
     })
@@ -97,7 +115,7 @@ export default function Steps() {
         Name: editForm.name,
         OrderIndex: editForm.orderIndex,
         OperationType: editForm.operationType,
-        WorkflowID: editForm.workflowId,
+        WorkflowID: Number(editForm.workflowId),
         AgentID: editForm.agentId ? Number(editForm.agentId) : null,
         Prompt: editForm.prompt
       })
@@ -163,9 +181,8 @@ export default function Steps() {
       >
         {showCreate ? "Cancel" : "+ Add Step"}
       </button>
-      <br></br>
+<br></br><br></br>
 
-<br></br>
       {showCreate && (
         <div className="editor">
           <label>Name</label>
@@ -199,11 +216,32 @@ export default function Steps() {
             }
           />
 
+          <label>Workflow</label>
+          <select
+            value={createForm.workflowId}
+            onChange={e =>
+              setCreateForm(f => ({
+                ...f,
+                workflowId: e.target.value
+              }))
+            }
+          >
+            <option value="">— Select workflow —</option>
+            {workflows.map(w => (
+              <option key={w.id} value={w.id}>
+                {w.name}
+              </option>
+            ))}
+          </select>
+
           <label>Agent</label>
           <select
             value={createForm.agentId}
             onChange={e =>
-              setCreateForm(f => ({ ...f, agentId: e.target.value }))
+              setCreateForm(f => ({
+                ...f,
+                agentId: e.target.value
+              }))
             }
           >
             <option value="">— None —</option>
@@ -263,61 +301,78 @@ export default function Steps() {
                   </td>
 
                   <td>{s.id}</td>
-                  <td>{editing ? (
-                    <input
-                      value={editForm.name}
-                      onChange={e =>
-                        setEditForm(f => ({
-                          ...f,
-                          name: e.target.value
-                        }))
-                      }
-                    />
-                  ) : s.name}</td>
 
-                  <td>{editing ? (
-                    <input
-                      value={editForm.operationType}
-                      onChange={e =>
-                        setEditForm(f => ({
-                          ...f,
-                          operationType: e.target.value
-                        }))
-                      }
-                    />
-                  ) : s.operationType}</td>
+                  <td>
+                    {editing ? (
+                      <input
+                        value={editForm.name}
+                        onChange={e =>
+                          setEditForm(f => ({
+                            ...f,
+                            name: e.target.value
+                          }))
+                        }
+                      />
+                    ) : (
+                      s.name
+                    )}
+                  </td>
 
-                  <td>{editing ? (
-                    <input
-                      type="number"
-                      value={editForm.orderIndex}
-                      onChange={e =>
-                        setEditForm(f => ({
-                          ...f,
-                          orderIndex: Number(e.target.value)
-                        }))
-                      }
-                    />
-                  ) : s.orderIndex}</td>
+                  <td>
+                    {editing ? (
+                      <input
+                        value={editForm.operationType}
+                        onChange={e =>
+                          setEditForm(f => ({
+                            ...f,
+                            operationType: e.target.value
+                          }))
+                        }
+                      />
+                    ) : (
+                      s.operationType
+                    )}
+                  </td>
 
-                  <td>{editing ? (
-                    <select
-                      value={editForm.agentId}
-                      onChange={e =>
-                        setEditForm(f => ({
-                          ...f,
-                          agentId: e.target.value
-                        }))
-                      }
-                    >
-                      <option value="">— None —</option>
-                      {agents.map(a => (
-                        <option key={a.id} value={a.id}>
-                          {a.provider}
-                        </option>
-                      ))}
-                    </select>
-                  ) : s.agent?.provider || "-"}</td>
+                  <td>
+                    {editing ? (
+                      <input
+                        type="number"
+                        value={editForm.orderIndex}
+                        onChange={e =>
+                          setEditForm(f => ({
+                            ...f,
+                            orderIndex: Number(e.target.value)
+                          }))
+                        }
+                      />
+                    ) : (
+                      s.orderIndex
+                    )}
+                  </td>
+
+                  <td>
+                    {editing ? (
+                      <select
+                        value={editForm.agentId}
+                        onChange={e =>
+                          setEditForm(f => ({
+                            ...f,
+                            agentId: e.target.value
+                          }))
+                        }
+                      >
+                        <option value="">— None —</option>
+                        {agents.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.provider}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      s.agent?.provider || "-"
+                    )}
+                  </td>
 
                   <td>
                     {editing ? (
@@ -339,7 +394,20 @@ export default function Steps() {
                     <td colSpan={7}>
                       <div className="editor">
                         <label>Prompt</label>
-                        <textarea rows="6" value={s.prompt} disabled />
+                        {editing ? (
+                          <textarea
+                            rows="6"
+                            value={editForm.prompt}
+                            onChange={e =>
+                              setEditForm(f => ({
+                                ...f,
+                                prompt: e.target.value
+                              }))
+                            }
+                          />
+                        ) : (
+                          <textarea rows="6" value={s.prompt} disabled />
+                        )}
                       </div>
                     </td>
                   </tr>
