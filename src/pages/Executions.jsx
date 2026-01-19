@@ -88,9 +88,13 @@ const CollapseAllIcon = () => (
 export default function Execution() {
   const [executions, setExecutions] = useState([])
   const [expanded, setExpanded] = useState({})
+  const [expandedOutput, setExpandedOutput] = useState({})
 
   const toggle = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
+
+  const toggleOutput = id =>
+    setExpandedOutput(o => ({ ...o, [id]: !o[id] }))
 
   const expandAll = () => {
     const all = {}
@@ -149,19 +153,9 @@ export default function Execution() {
         <thead>
           <tr>
             <th style={{ width: 60 }} />
-
-            <ResizableTH style={{ width: 120 }}>
-              Execution
-            </ResizableTH>
-
-            <ResizableTH style={{ width: 120 }}>
-              Status
-            </ResizableTH>
-
-            <ResizableTH style={{ width: 260 }}>
-              Workflow
-            </ResizableTH>
-
+            <ResizableTH style={{ width: 120 }}>Execution</ResizableTH>
+            <ResizableTH style={{ width: 120 }}>Status</ResizableTH>
+            <ResizableTH style={{ width: 260 }}>Workflow</ResizableTH>
             <ResizableTH>Description</ResizableTH>
           </tr>
         </thead>
@@ -204,7 +198,7 @@ export default function Execution() {
                 </tr>
 
                 {/* ======================
-                     EXPANDED
+                     EXPANDED (NESTED)
                 ====================== */}
                 {isOpen && (
                   <tr>
@@ -218,53 +212,81 @@ export default function Execution() {
                             <ResizableTH style={{ width: 80 }}>
                               Step
                             </ResizableTH>
-
                             <ResizableTH style={{ width: 120 }}>
                               Status
                             </ResizableTH>
-
                             <ResizableTH style={{ width: 220 }}>
                               Name
                             </ResizableTH>
-
                             <ResizableTH style={{ width: 220 }}>
                               Operation
                             </ResizableTH>
-
                             <ResizableTH>Output</ResizableTH>
+                            <ResizableTH style={{ width: 160 }}>
+                              Created
+                            </ResizableTH>
+                            <ResizableTH style={{ width: 160 }}>
+                              Updated
+                            </ResizableTH>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {e.steps.map(s => (
-                            <tr key={s.id}>
-                              <td>{s.step_id}</td>
+                          {e.steps.map(s => {
+                            const openOutput =
+                              expandedOutput[s.id]
 
-                              <td>
-                                <span
-                                  className={statusClass(s.status)}
-                                >
-                                  {s.status}
-                                </span>
-                              </td>
+                            return (
+                              <tr key={s.id}>
+                                <td>{s.step_id}</td>
 
-                              <td>{s.step.Name}</td>
-                              <td>{s.step.OperationType}</td>
+                                <td>
+                                  <span
+                                    className={statusClass(
+                                      s.status
+                                    )}
+                                  >
+                                    {s.status}
+                                  </span>
+                                </td>
 
-                              <td>
-                                <pre
-                                  style={{
-                                    maxHeight: 200,
-                                    overflow: "auto",
-                                    whiteSpace: "pre-wrap",
-                                    margin: 0
-                                  }}
-                                >
-                                  {s.output}
-                                </pre>
-                              </td>
-                            </tr>
-                          ))}
+                                <td>{s.step.Name}</td>
+                                <td>{s.step.OperationType}</td>
+
+                                <td>
+                                  <pre
+                                    onClick={() =>
+                                      toggleOutput(s.id)
+                                    }
+                                    style={{
+                                      maxHeight: openOutput
+                                        ? "none"
+                                        : "1.4em",
+                                      overflow: "hidden",
+                                      whiteSpace: "pre-wrap",
+                                      margin: 0,
+                                      cursor: "pointer",
+                                      color: "inherit"
+                                    }}
+                                  >
+                                    {s.output}
+                                  </pre>
+                                </td>
+
+                                <td>
+                                  {new Date(
+                                    s.created_at
+                                  ).toLocaleString()}
+                                </td>
+
+                                <td>
+                                  {new Date(
+                                    s.updated_at
+                                  ).toLocaleString()}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </table>
                     </td>
