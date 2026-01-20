@@ -23,10 +23,7 @@ const startResize = th => e => {
   const startWidth = th.offsetWidth
 
   const onMouseMove = e => {
-    const newWidth = Math.max(
-      60,
-      startWidth + (e.clientX - startX)
-    )
+    const newWidth = Math.max(60, startWidth + (e.clientX - startX))
     th.style.width = `${newWidth}px`
   }
 
@@ -158,7 +155,6 @@ export default function Execution() {
             <ResizableTH style={{ width: 260 }}>Workflow</ResizableTH>
             <ResizableTH>Description</ResizableTH>
             <ResizableTH style={{ width: 160 }}>Created</ResizableTH>
-            <ResizableTH style={{ width: 160 }}>Updated</ResizableTH>
           </tr>
         </thead>
 
@@ -172,12 +168,6 @@ export default function Execution() {
               !exec.created_at.startsWith("0001-01-01")
                 ? exec.created_at
                 : e.steps?.[0]?.created_at
-
-            const updatedAt =
-              exec.updated_at &&
-              !exec.updated_at.startsWith("0001-01-01")
-                ? exec.updated_at
-                : e.steps?.[e.steps.length - 1]?.updated_at
 
             return (
               <>
@@ -215,12 +205,6 @@ export default function Execution() {
                       ? new Date(createdAt).toLocaleString()
                       : "-"}
                   </td>
-
-                  <td>
-                    {updatedAt
-                      ? new Date(updatedAt).toLocaleString()
-                      : "-"}
-                  </td>
                 </tr>
 
                 {/* ======================
@@ -229,7 +213,7 @@ export default function Execution() {
                 {isOpen && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className="execution-expanded indent-bar-deep"
                     >
                       <table className="table" style={{ margin: 0 }}>
@@ -251,16 +235,12 @@ export default function Execution() {
                             <ResizableTH style={{ width: 160 }}>
                               Created
                             </ResizableTH>
-                            <ResizableTH style={{ width: 160 }}>
-                              Updated
-                            </ResizableTH>
                           </tr>
                         </thead>
 
                         <tbody>
                           {e.steps.map(s => {
-                            const openOutput =
-                              expandedOutput[s.id]
+                            const openOutput = expandedOutput[s.id]
 
                             return (
                               <tr key={s.id}>
@@ -268,9 +248,7 @@ export default function Execution() {
 
                                 <td>
                                   <span
-                                    className={statusClass(
-                                      s.status
-                                    )}
+                                    className={statusClass(s.status)}
                                   >
                                     {s.status}
                                   </span>
@@ -302,12 +280,6 @@ export default function Execution() {
                                 <td>
                                   {new Date(
                                     s.created_at
-                                  ).toLocaleString()}
-                                </td>
-
-                                <td>
-                                  {new Date(
-                                    s.updated_at
                                   ).toLocaleString()}
                                 </td>
                               </tr>
