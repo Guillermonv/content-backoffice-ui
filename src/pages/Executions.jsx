@@ -13,7 +13,7 @@ const statusClass = status => {
   return "status status-yellow"
 }
 
-/* ======================
+/* =====================
    Column resize helper
 ====================== */
 const startResize = th => e => {
@@ -87,6 +87,9 @@ export default function Execution() {
   const [expanded, setExpanded] = useState({})
   const [expandedOutput, setExpandedOutput] = useState({})
 
+  const [fromDate, setFromDate] = useState("")
+  const [toDate, setToDate] = useState("")
+
   const toggle = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
 
@@ -104,9 +107,23 @@ export default function Execution() {
   const collapseAll = () => setExpanded({})
 
   const load = async () => {
-    const res = await fetch(`${API}/step-executions-grouped`, {
-      headers: { Authorization: `Bearer ${TOKEN}` }
-    })
+    const params = new URLSearchParams()
+
+    if (fromDate) {
+      params.append("from", new Date(fromDate).toISOString())
+    }
+
+    if (toDate) {
+      params.append("to", new Date(toDate).toISOString())
+    }
+
+    const res = await fetch(
+      `${API}/step-executions-grouped?${params.toString()}`,
+      {
+        headers: { Authorization: `Bearer ${TOKEN}` }
+      }
+    )
+
     setExecutions(await res.json())
   }
 
@@ -124,7 +141,28 @@ export default function Execution() {
           <h1>Executions</h1>
         </div>
 
-        <div className="steps-header-right" style={{ gap: 8 }}>
+        <div
+          className="steps-header-right"
+          style={{ gap: 8, alignItems: "center" }}
+        >
+          <input
+            type="datetime-local"
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+            title="From"
+          />
+
+          <input
+            type="datetime-local"
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+            title="To"
+          />
+
+          <button className="btn" onClick={load}>
+            Apply
+          </button>
+
           <button
             className="btn-expand"
             title="Expand all"
@@ -171,9 +209,6 @@ export default function Execution() {
 
             return (
               <>
-                {/* ======================
-                     MAIN ROW
-                ====================== */}
                 <tr key={exec.id} className={isOpen ? "active" : ""}>
                   <td>
                     <button
@@ -207,9 +242,6 @@ export default function Execution() {
                   </td>
                 </tr>
 
-                {/* ======================
-                     EXPANDED (NESTED)
-                ====================== */}
                 {isOpen && (
                   <tr>
                     <td
@@ -245,18 +277,13 @@ export default function Execution() {
                             return (
                               <tr key={s.id}>
                                 <td>{s.step_id}</td>
-
                                 <td>
-                                  <span
-                                    className={statusClass(s.status)}
-                                  >
+                                  <span className={statusClass(s.status)}>
                                     {s.status}
                                   </span>
                                 </td>
-
                                 <td>{s.step.Name}</td>
                                 <td>{s.step.OperationType}</td>
-
                                 <td>
                                   <pre
                                     onClick={() =>
@@ -269,14 +296,12 @@ export default function Execution() {
                                       overflow: "hidden",
                                       whiteSpace: "pre-wrap",
                                       margin: 0,
-                                      cursor: "pointer",
-                                      color: "inherit"
+                                      cursor: "pointer"
                                     }}
                                   >
                                     {s.output}
                                   </pre>
                                 </td>
-
                                 <td>
                                   {new Date(
                                     s.created_at
