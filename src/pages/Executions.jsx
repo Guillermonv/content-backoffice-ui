@@ -192,7 +192,8 @@ export default function Execution() {
             <ResizableTH style={{ width: 120 }}>Status</ResizableTH>
             <ResizableTH style={{ width: 260 }}>Workflow</ResizableTH>
             <ResizableTH>Description</ResizableTH>
-            <ResizableTH style={{ width: 160 }}>Created</ResizableTH>
+            {/* +60% */}
+            <ResizableTH style={{ width: 256 }}>Created</ResizableTH>
           </tr>
         </thead>
 
@@ -264,7 +265,8 @@ export default function Execution() {
                               Operation
                             </ResizableTH>
                             <ResizableTH>Output</ResizableTH>
-                            <ResizableTH style={{ width: 160 }}>
+                            {/* +60% */}
+                            <ResizableTH style={{ width: 256 }}>
                               Created
                             </ResizableTH>
                           </tr>

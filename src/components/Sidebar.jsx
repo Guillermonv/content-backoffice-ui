@@ -10,7 +10,7 @@ export default function Sidebar() {
       <NavLink to="/agents">Agents</NavLink>
       <NavLink to="/steps">Steps</NavLink>
       <NavLink to="/executions">Executions</NavLink>
-      <NavLink to="/">Content Review</NavLink>
+      <NavLink to="/ContentReview">Content Review</NavLink>
 
     </aside>
   )

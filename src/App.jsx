@@ -6,6 +6,9 @@ import Steps from './pages/Steps'
 import Agents from './pages/Agents'
 import Workflows from './pages/Workflows'
 import Executions from './pages/Executions'
+import ContentReview from './pages/ContentReview'
+
+
 
 export default function App() {
   return (
@@ -18,7 +21,7 @@ export default function App() {
           <Route path="/agents" element={<Agents />} />
           <Route path="/workflows" element={<Workflows />} />
           <Route path="/executions" element={<Executions />} />
-
+          <Route path="/contentReview" element={<ContentReview />} />
         </Routes>
       </main>
     </div>
