@@ -90,9 +90,13 @@ export default function Execution() {
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
 
-  // 🔥 filtros nuevos (API real)
+  // filtros
   const [status, setStatus] = useState("")
   const [workflowName, setWorkflowName] = useState("")
+
+  // 🔥 paginación
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const toggle = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
@@ -111,6 +115,8 @@ export default function Execution() {
   const collapseAll = () => setExpanded({})
 
   const load = async () => {
+    setPage(1)
+
     const params = new URLSearchParams()
 
     if (fromDate) {
@@ -121,7 +127,6 @@ export default function Execution() {
       params.append("to", new Date(toDate).toISOString())
     }
 
-    // ✅ filtros correctos
     if (status) {
       params.append("status", status)
     }
@@ -143,6 +148,17 @@ export default function Execution() {
   useEffect(() => {
     load()
   }, [])
+
+  // paginación client-side
+  const totalPages = Math.max(
+    1,
+    Math.ceil(executions.length / pageSize)
+  )
+
+  const paginatedExecutions = executions.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  )
 
   return (
     <div className="steps-page">
@@ -172,7 +188,6 @@ export default function Execution() {
             title="To"
           />
 
-          {/* 🔥 filtros nuevos */}
           <select
             value={status}
             onChange={e => setStatus(e.target.value)}
@@ -214,6 +229,53 @@ export default function Execution() {
       </div>
 
       {/* ======================
+           Pagination
+      ====================== */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 8
+        }}
+      >
+        <div>
+          <button
+            className="btn"
+            disabled={page === 1}
+            onClick={() => setPage(p => p - 1)}
+          >
+            Prev
+          </button>
+
+          <span style={{ margin: "0 8px" }}>
+            Page {page} / {totalPages}
+          </span>
+
+          <button
+            className="btn"
+            disabled={page === totalPages}
+            onClick={() => setPage(p => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(Number(e.target.value))
+            setPage(1)
+          }}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+      </div>
+
+      {/* ======================
            Table
       ====================== */}
       <table className="table">
@@ -229,7 +291,7 @@ export default function Execution() {
         </thead>
 
         <tbody>
-          {executions.map(e => {
+          {paginatedExecutions.map(e => {
             const exec = e.execution
             const isOpen = expanded[exec.id]
 
@@ -276,10 +338,7 @@ export default function Execution() {
 
                 {isOpen && (
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="execution-expanded indent-bar-deep"
-                    >
+                    <td colSpan={6} className="execution-expanded indent-bar-deep">
                       <table className="table" style={{ margin: 0 }}>
                         <thead>
                           <tr>
@@ -318,9 +377,7 @@ export default function Execution() {
                                 <td>{s.step.OperationType}</td>
                                 <td>
                                   <pre
-                                    onClick={() =>
-                                      toggleOutput(s.id)
-                                    }
+                                    onClick={() => toggleOutput(s.id)}
                                     style={{
                                       maxHeight: openOutput
                                         ? "none"
@@ -335,9 +392,7 @@ export default function Execution() {
                                   </pre>
                                 </td>
                                 <td>
-                                  {new Date(
-                                    s.created_at
-                                  ).toLocaleString()}
+                                  {new Date(s.created_at).toLocaleString()}
                                 </td>
                               </tr>
                             )
