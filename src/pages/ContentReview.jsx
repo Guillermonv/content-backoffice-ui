@@ -13,7 +13,15 @@ const statusClass = status => {
 
 const formatDate = d => {
   if (!d || d.startsWith("0001")) return "—"
-  return new Date(d).toLocaleDateString()
+
+  return new Date(d).toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })
 }
 
 const ResizableTH = ({
@@ -79,7 +87,7 @@ export default function Content() {
     type: 120,
     category: 150,
     created: 140,
-    actions: 120
+    actions: 140
   }
 
   useEffect(() => {
@@ -139,7 +147,6 @@ export default function Content() {
 
       const updated = await res.json()
 
-      // Update optimista sin reload completo
       setRows(prev =>
         prev.map(r => (r.id === id ? updated : r))
       )
@@ -147,6 +154,31 @@ export default function Content() {
       setEditingId(null)
     } catch (err) {
       alert("Error updating item")
+      console.error(err)
+    }
+  }
+
+  // ✅ NUEVO BOTÓN DONE
+  const markAsDone = async id => {
+    try {
+      const res = await fetch(`${API}/content-reviews/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "DONE" }),
+      })
+
+      if (!res.ok) throw new Error("Failed to update status")
+
+      const updated = await res.json()
+
+      setRows(prev =>
+        prev.map(r => (r.id === id ? updated : r))
+      )
+    } catch (err) {
+      alert("Error updating status")
       console.error(err)
     }
   }
@@ -213,13 +245,46 @@ export default function Content() {
                     <td>
                       {!editing ? (
                         <>
-                          <button className="btn-icon" onClick={() => startEdit(row)}>✏️</button>
-                          <button className="btn-icon danger" onClick={() => deleteRow(row.id)}>🗑️</button>
+                          {row.status !== "DONE" && (
+                            <button
+                              className="btn-icon success"
+                              title="Mark as DONE"
+                              onClick={() => markAsDone(row.id)}
+                            >
+                              ✅
+                            </button>
+                          )}
+
+                          <button
+                            className="btn-icon"
+                            title="Edit"
+                            onClick={() => startEdit(row)}
+                          >
+                            ✏️
+                          </button>
+
+                          <button
+                            className="btn-icon danger"
+                            title="Delete"
+                            onClick={() => deleteRow(row.id)}
+                          >
+                            🗑️
+                          </button>
                         </>
                       ) : (
                         <>
-                          <button className="btn-icon success" onClick={() => saveEdit(row.id)}>✔️</button>
-                          <button className="btn-icon" onClick={cancelEdit}>✖️</button>
+                          <button
+                            className="btn-icon success"
+                            onClick={() => saveEdit(row.id)}
+                          >
+                            ✔️
+                          </button>
+                          <button
+                            className="btn-icon"
+                            onClick={cancelEdit}
+                          >
+                            ✖️
+                          </button>
                         </>
                       )}
                     </td>
@@ -237,36 +302,12 @@ export default function Content() {
                           </>
                         ) : (
                           <div className="editor">
-                            <input
-                              value={editForm.title}
-                              onChange={e => handleChange("title", e.target.value)}
-                              placeholder="Title"
-                            />
-                            <input
-                              value={editForm.short_description}
-                              onChange={e => handleChange("short_description", e.target.value)}
-                              placeholder="Short Description"
-                            />
-                            <textarea
-                              value={editForm.message}
-                              onChange={e => handleChange("message", e.target.value)}
-                              placeholder="Message"
-                            />
-                            <input
-                              value={editForm.status}
-                              onChange={e => handleChange("status", e.target.value)}
-                              placeholder="Status"
-                            />
-                            <input
-                              value={editForm.type}
-                              onChange={e => handleChange("type", e.target.value)}
-                              placeholder="Type"
-                            />
-                            <input
-                              value={editForm.category}
-                              onChange={e => handleChange("category", e.target.value)}
-                              placeholder="Category"
-                            />
+                            <input value={editForm.title} onChange={e => handleChange("title", e.target.value)} placeholder="Title" />
+                            <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} placeholder="Short Description" />
+                            <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} placeholder="Message" />
+                            <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} placeholder="Status" />
+                            <input value={editForm.type} onChange={e => handleChange("type", e.target.value)} placeholder="Type" />
+                            <input value={editForm.category} onChange={e => handleChange("category", e.target.value)} placeholder="Category" />
                           </div>
                         )}
                       </td>
