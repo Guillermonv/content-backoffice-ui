@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Fragment } from "react"
+import React, { useEffect, useState, useRef, Fragment } from "react"
 
 const API = import.meta.env.VITE_API_BASE_URL
 const TOKEN = import.meta.env.VITE_API_TOKEN
@@ -13,24 +13,11 @@ const statusClass = status => {
 
 const formatDate = d => {
   if (!d || d.startsWith("0001")) return "—"
-
-  return new Date(d).toLocaleString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  })
+  return new Date(d).toLocaleString()
 }
 
-const ResizableTH = ({
-  children,
-  columnKey,
-  widths,
-  setWidths,
-  defaultWidth
-}) => {
+/* ================= RESIZABLE ================= */
+const ResizableTH = ({ children, columnKey, widths, setWidths, defaultWidth }) => {
   const ref = useRef(null)
 
   const startResize = e => {
@@ -58,13 +45,7 @@ const ResizableTH = ({
   }
 
   return (
-    <th
-      ref={ref}
-      style={{
-        width: widths[columnKey] || defaultWidth,
-        minWidth: 80
-      }}
-    >
+    <th ref={ref} style={{ width: widths[columnKey] || defaultWidth, minWidth: 80 }}>
       {children}
       <div className="col-resizer" onMouseDown={startResize} />
     </th>
@@ -72,11 +53,25 @@ const ResizableTH = ({
 }
 
 export default function Content() {
+
   const [rows, setRows] = useState([])
   const [expanded, setExpanded] = useState({})
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [loading, setLoading] = useState(true)
+
+  /* PAGINATION */
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+
+  /* FILTERS */
+  const [statusFilter, setStatusFilter] = useState("")
+  const [executionFilter, setExecutionFilter] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState("")
+  const [fromDate, setFromDate] = useState("")
+  const [toDate, setToDate] = useState("")
+
   const [widths, setWidths] = useState({})
 
   const defaultWidths = {
@@ -86,27 +81,42 @@ export default function Content() {
     status: 120,
     type: 120,
     category: 150,
-    created: 140,
-    actions: 140
-  }
-
-  useEffect(() => {
-    load()
-  }, [])
-
-  const load = async () => {
-    setLoading(true)
-    const res = await fetch(`${API}/content-reviews`, {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-    })
-    const data = await res.json()
-    setRows(data)
-    setLoading(false)
+    created: 180,
+    actions: 160
   }
 
   const toggleExpand = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
 
+  /* ================= LOAD ================= */
+  const load = async () => {
+    setLoading(true)
+
+    const params = new URLSearchParams()
+    params.append("page", page)
+    params.append("limit", limit)
+
+    if (statusFilter) params.append("status", statusFilter)
+    if (executionFilter) params.append("execution_id", executionFilter)
+    if (categoryFilter) params.append("category", categoryFilter)
+    if (fromDate) params.append("from", fromDate)
+    if (toDate) params.append("to", toDate)
+
+    const res = await fetch(
+      `${API}/content-reviews?${params.toString()}`,
+      { headers: { Authorization: `Bearer ${TOKEN}` } }
+    )
+
+    const json = await res.json()
+
+    setRows(json.data || [])
+    setTotalPages(json.pagination?.totalPages || 1)
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [page, limit, statusFilter, executionFilter, categoryFilter, fromDate, toDate])
+
+  /* ================= EDIT ================= */
   const startEdit = row => {
     setEditingId(row.id)
     setEditForm({
@@ -115,11 +125,7 @@ export default function Content() {
       message: row.message || "",
       status: row.status || "",
       type: row.type || "",
-      sub_type: row.sub_type || "",
-      category: row.category || "",
-      sub_category: row.sub_category || "",
-      image_url: row.image_url || "",
-      image_prompt: row.image_prompt || "",
+      category: row.category || ""
     })
   }
 
@@ -128,76 +134,126 @@ export default function Content() {
     setEditForm({})
   }
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value) =>
     setEditForm(prev => ({ ...prev, [field]: value }))
-  }
 
   const saveEdit = async id => {
-    try {
-      const res = await fetch(`${API}/content-reviews/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editForm),
-      })
+    const res = await fetch(`${API}/content-reviews/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(editForm)
+    })
 
-      if (!res.ok) throw new Error("Failed to update")
+    const updated = await res.json()
 
-      const updated = await res.json()
-
-      setRows(prev =>
-        prev.map(r => (r.id === id ? updated : r))
-      )
-
-      setEditingId(null)
-    } catch (err) {
-      alert("Error updating item")
-      console.error(err)
-    }
+    setRows(prev => prev.map(r => (r.id === id ? updated : r)))
+    setEditingId(null)
   }
 
-  // ✅ NUEVO BOTÓN DONE
   const markAsDone = async id => {
-    try {
-      const res = await fetch(`${API}/content-reviews/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: "DONE" }),
-      })
+    const res = await fetch(`${API}/content-reviews/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status: "DONE" })
+    })
 
-      if (!res.ok) throw new Error("Failed to update status")
+    const updated = await res.json()
 
-      const updated = await res.json()
-
-      setRows(prev =>
-        prev.map(r => (r.id === id ? updated : r))
-      )
-    } catch (err) {
-      alert("Error updating status")
-      console.error(err)
-    }
+    setRows(prev => prev.map(r => (r.id === id ? updated : r)))
   }
 
   const deleteRow = async id => {
     if (!window.confirm("Delete this item?")) return
     await fetch(`${API}/content-reviews/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${TOKEN}` },
+      headers: { Authorization: `Bearer ${TOKEN}` }
     })
     setRows(r => r.filter(x => x.id !== id))
   }
 
+  /* PAGINATION CONTROLS */
+  const goFirst = () => setPage(1)
+  const goPrev = () => setPage(p => Math.max(1, p - 1))
+  const goNext = () => setPage(p => Math.min(totalPages, p + 1))
+  const goLast = () => setPage(totalPages)
+
   return (
     <div className="steps-page">
-      <div className="page-header">
-        <h1>Content Review</h1>
+      <h1>Content Review</h1>
+
+      {/* HEADER */}
+      <div className="steps-header">
+
+        {/* LEFT FILTERS */}
+        <div className="steps-header-left">
+          <div className="header-group">
+
+            <select
+              className="select-primary"
+              value={statusFilter}
+              onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
+            >
+              <option value="">All Status</option>
+              <option value="DONE">DONE</option>
+              <option value="ERROR">ERROR</option>
+              <option value="PENDING">PENDING</option>
+            </select>
+
+            <input
+              type="number"
+              placeholder="Execution ID"
+              className="filter-input"
+              value={executionFilter}
+              onChange={e => { setExecutionFilter(e.target.value); setPage(1) }}
+            />
+
+            <input
+              type="text"
+              placeholder="Category"
+              className="filter-input"
+              value={categoryFilter}
+              onChange={e => { setCategoryFilter(e.target.value); setPage(1) }}
+            />
+
+          </div>
+        </div>
+
+        {/* RIGHT PAGINATION */}
+        <div className="pagination-box">
+
+          <div className="header-group">
+            <input type="date" className="filter-input" value={fromDate}
+              onChange={e => { setFromDate(e.target.value); setPage(1) }} />
+            <input type="date" className="filter-input" value={toDate}
+              onChange={e => { setToDate(e.target.value); setPage(1) }} />
+          </div>
+
+          <select value={limit}
+            onChange={e => { setLimit(Number(e.target.value)); setPage(1) }}
+            style={{ width: 60,height:32 }}>
+            <option value={10}>10</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+
+          <button className="btn-primary" onClick={goFirst} disabled={page === 1}>«</button>
+          <button className="btn-primary" onClick={goPrev} disabled={page === 1}>‹</button>
+          <button className="btn-primary" onClick={goNext} disabled={page === totalPages}>›</button>
+          <button className="btn-primary" onClick={goLast} disabled={page === totalPages}>»</button>
+
+          <span className="page-info" style={{ marginLeft: 16 }}>
+            {page} / {totalPages}
+          </span>
+        </div>
       </div>
 
+      {/* TABLE */}
       {loading ? (
         <div className="loading">Loading…</div>
       ) : (
@@ -218,18 +274,17 @@ export default function Content() {
 
           <tbody>
             {rows.map(row => {
-              const isExpanded = expanded[row.id]
+              const open = expanded[row.id]
               const editing = editingId === row.id
 
               return (
                 <Fragment key={row.id}>
                   <tr className={editing ? "active" : ""}>
-                    <td className="cell-center">
+                    <td>
                       <button className="btn-expand" onClick={() => toggleExpand(row.id)}>
-                        {isExpanded ? "▾" : "▸"}
+                        {open ? "▾" : "▸"}
                       </button>
                     </td>
-
                     <td>{row.id}</td>
                     <td>{row.execution_id}</td>
                     <td>{row.title}</td>
@@ -246,68 +301,36 @@ export default function Content() {
                       {!editing ? (
                         <>
                           {row.status !== "DONE" && (
-                            <button
-                              className="btn-icon success"
-                              title="Mark as DONE"
-                              onClick={() => markAsDone(row.id)}
-                            >
-                              ✅
-                            </button>
+                            <button className="btn-icon success" onClick={() => markAsDone(row.id)}>✅</button>
                           )}
-
-                          <button
-                            className="btn-icon"
-                            title="Edit"
-                            onClick={() => startEdit(row)}
-                          >
-                            ✏️
-                          </button>
-
-                          <button
-                            className="btn-icon danger"
-                            title="Delete"
-                            onClick={() => deleteRow(row.id)}
-                          >
-                            🗑️
-                          </button>
+                          <button className="btn-icon" onClick={() => startEdit(row)}>✏️</button>
+                          <button className="btn-icon danger" onClick={() => deleteRow(row.id)}>🗑️</button>
                         </>
                       ) : (
                         <>
-                          <button
-                            className="btn-icon success"
-                            onClick={() => saveEdit(row.id)}
-                          >
-                            ✔️
-                          </button>
-                          <button
-                            className="btn-icon"
-                            onClick={cancelEdit}
-                          >
-                            ✖️
-                          </button>
+                          <button className="btn-icon success" onClick={() => saveEdit(row.id)}>✔️</button>
+                          <button className="btn-icon" onClick={cancelEdit}>✖️</button>
                         </>
                       )}
                     </td>
                   </tr>
 
-                  {isExpanded && (
-                    <tr className="execution-expanded indent-bar-deep">
-                      <td colSpan={9}>
+                  {open && (
+                    <tr>
+                      <td colSpan={9} className="execution-expanded indent-bar-deep">
                         {!editing ? (
                           <>
                             <strong>{row.short_description}</strong>
-                            <p style={{ whiteSpace: "pre-wrap" }}>
-                              {row.message}
-                            </p>
+                            <p style={{ whiteSpace: "pre-wrap" }}>{row.message}</p>
                           </>
                         ) : (
                           <div className="editor">
-                            <input value={editForm.title} onChange={e => handleChange("title", e.target.value)} placeholder="Title" />
-                            <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} placeholder="Short Description" />
-                            <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} placeholder="Message" />
-                            <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} placeholder="Status" />
-                            <input value={editForm.type} onChange={e => handleChange("type", e.target.value)} placeholder="Type" />
-                            <input value={editForm.category} onChange={e => handleChange("category", e.target.value)} placeholder="Category" />
+                            <input value={editForm.title} onChange={e => handleChange("title", e.target.value)} />
+                            <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} />
+                            <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} />
+                            <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} />
+                            <input value={editForm.type} onChange={e => handleChange("type", e.target.value)} />
+                            <input value={editForm.category} onChange={e => handleChange("category", e.target.value)} />
                           </div>
                         )}
                       </td>
