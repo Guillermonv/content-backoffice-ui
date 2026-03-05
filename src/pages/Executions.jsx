@@ -70,6 +70,7 @@ export default function Execution() {
 
   const [statusFilter, setStatusFilter] = useState("")
   const [workflowFilter, setWorkflowFilter] = useState("")
+  const [executionIdFilter, setExecutionIdFilter] = useState("")
   const [workflows, setWorkflows] = useState([])
 
   const [fromDate, setFromDate] = useState("")
@@ -126,6 +127,7 @@ export default function Execution() {
 
     if (statusFilter) params.append("status", statusFilter)
     if (workflowFilter) params.append("workflowId", workflowFilter)
+    if (executionIdFilter) params.append("execution_id", executionIdFilter)
 
     if (fromDate)
       params.append("from", new Date(fromDate).toISOString())
@@ -147,7 +149,10 @@ export default function Execution() {
   }
 
   useEffect(() => { loadWorkflows() }, [])
-  useEffect(() => { load() }, [page, pageSize, statusFilter, workflowFilter, fromDate, toDate])
+
+  useEffect(() => {
+    load()
+  }, [page, pageSize, statusFilter, workflowFilter, executionIdFilter, fromDate, toDate])
 
   const goFirst = () => setPage(1)
   const goPrev = () => setPage(p => Math.max(1, p - 1))
@@ -161,10 +166,8 @@ export default function Execution() {
       {/* ================= HEADER ================= */}
       <div className="steps-header">
 
-        {/* LEFT SIDE */}
         <div className="steps-header-left">
 
-          {/* ICONS ONLY */}
           <div className="header-group">
             <button className="btn-expand" onClick={expandAll}>
               <ExpandAllIcon />
@@ -174,8 +177,6 @@ export default function Execution() {
             </button>
           </div>
 
-
-          {/* FILTERS */}
           <div className="header-group">
 
             <select
@@ -202,15 +203,25 @@ export default function Execution() {
               ))}
             </select>
 
-
+            {/* 🔥 NUEVO FILTRO */}
+            <input
+              type="number"
+              placeholder="Execution ID"
+              className="filter-input"
+              value={executionIdFilter}
+              onChange={e => {
+                setExecutionIdFilter(e.target.value)
+                setPage(1)
+              }}
+              style={{ width: 140 }}
+            />
 
           </div>
         </div>
 
         {/* RIGHT SIDE PAGINATION */}
         <div className="pagination-box">
-        <div className="header-group">
-         {/* DATES */}
+          <div className="header-group">
             <input
               type="date"
               className="filter-input"
@@ -224,26 +235,14 @@ export default function Execution() {
               onChange={e => { setToDate(e.target.value); setPage(1) }}
             />
           </div>
-                      {/* SMALL DROPDOWN */}
-                      <select
+
+          <select
             value={pageSize}
             onChange={e => {
               setPageSize(Number(e.target.value))
               setPage(1)
             }}
-            style={{
-              width: 60,
-              height: 32,
-              minWidth: 60,
-              maxWidth: 60,
-              padding: "4px 6px",
-              fontSize: 13,
-              boxSizing: "border-box",
-              appearance: "none",
-              WebkitAppearance: "none",
-              MozAppearance: "none",
-              textAlign: "center"
-            }}
+            style={{ width: 60, height: 32, textAlign: "center" }}
           >
             <option value={10}>10</option>
             <option value={50}>50</option>
@@ -251,17 +250,15 @@ export default function Execution() {
           </select>
 
           <button className="btn-primary" onClick={goFirst} disabled={page === 1}>«</button>
-<button className="btn-primary" onClick={goPrev} disabled={page === 1}>‹</button>
-<button className="btn-primary" onClick={goNext} disabled={page === totalPages}>›</button>
-<button className="btn-primary" onClick={goLast} disabled={page === totalPages}>»</button>
-          {/* TOTAL PAGES FAR RIGHT */}
+          <button className="btn-primary" onClick={goPrev} disabled={page === 1}>‹</button>
+          <button className="btn-primary" onClick={goNext} disabled={page === totalPages}>›</button>
+          <button className="btn-primary" onClick={goLast} disabled={page === totalPages}>»</button>
+
           <span className="page-info" style={{ marginLeft: 16 }}>
             {page} / {totalPages}
           </span>
-
         </div>
       </div>
-
       {/* ================= TABLE ================= */}
       <table className="table">
         <thead>

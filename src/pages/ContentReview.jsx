@@ -45,7 +45,10 @@ const ResizableTH = ({ children, columnKey, widths, setWidths, defaultWidth }) =
   }
 
   return (
-    <th ref={ref} style={{ width: widths[columnKey] || defaultWidth, minWidth: 80 }}>
+    <th
+      ref={ref}
+      style={{ width: widths[columnKey] || defaultWidth, minWidth: 80 }}
+    >
       {children}
       <div className="col-resizer" onMouseDown={startResize} />
     </th>
@@ -79,8 +82,8 @@ export default function Content() {
     execution: 120,
     title: 300,
     status: 120,
-    type: 120,
     category: 150,
+    subCategory: 150,
     created: 180,
     actions: 160
   }
@@ -114,7 +117,9 @@ export default function Content() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [page, limit, statusFilter, executionFilter, categoryFilter, fromDate, toDate])
+  useEffect(() => {
+    load()
+  }, [page, limit, statusFilter, executionFilter, categoryFilter, fromDate, toDate])
 
   /* ================= EDIT ================= */
   const startEdit = row => {
@@ -124,8 +129,8 @@ export default function Content() {
       short_description: row.short_description || "",
       message: row.message || "",
       status: row.status || "",
-      type: row.type || "",
-      category: row.category || ""
+      category: row.category || "",
+      subCategory: row.subCategory || ""
     })
   }
 
@@ -148,7 +153,6 @@ export default function Content() {
     })
 
     const updated = await res.json()
-
     setRows(prev => prev.map(r => (r.id === id ? updated : r)))
     setEditingId(null)
   }
@@ -164,7 +168,6 @@ export default function Content() {
     })
 
     const updated = await res.json()
-
     setRows(prev => prev.map(r => (r.id === id ? updated : r)))
   }
 
@@ -177,7 +180,6 @@ export default function Content() {
     setRows(r => r.filter(x => x.id !== id))
   }
 
-  /* PAGINATION CONTROLS */
   const goFirst = () => setPage(1)
   const goPrev = () => setPage(p => Math.max(1, p - 1))
   const goNext = () => setPage(p => Math.min(totalPages, p + 1))
@@ -187,10 +189,9 @@ export default function Content() {
     <div className="steps-page">
       <h1>Content Review</h1>
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
       <div className="steps-header">
 
-        {/* LEFT FILTERS */}
         <div className="steps-header-left">
           <div className="header-group">
 
@@ -224,19 +225,22 @@ export default function Content() {
           </div>
         </div>
 
-        {/* RIGHT PAGINATION */}
         <div className="pagination-box">
 
           <div className="header-group">
-            <input type="date" className="filter-input" value={fromDate}
+            <input type="date" className="filter-input"
+              value={fromDate}
               onChange={e => { setFromDate(e.target.value); setPage(1) }} />
-            <input type="date" className="filter-input" value={toDate}
+            <input type="date" className="filter-input"
+              value={toDate}
               onChange={e => { setToDate(e.target.value); setPage(1) }} />
           </div>
 
-          <select value={limit}
+          <select
+            value={limit}
             onChange={e => { setLimit(Number(e.target.value)); setPage(1) }}
-            style={{ width: 60,height:32 }}>
+            style={{ width: 60, height: 32 }}
+          >
             <option value={10}>10</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
@@ -253,7 +257,7 @@ export default function Content() {
         </div>
       </div>
 
-      {/* TABLE */}
+      {/* ================= TABLE ================= */}
       {loading ? (
         <div className="loading">Loading…</div>
       ) : (
@@ -265,8 +269,8 @@ export default function Content() {
               <ResizableTH columnKey="execution" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.execution}>Execution</ResizableTH>
               <ResizableTH columnKey="title" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.title}>Title</ResizableTH>
               <ResizableTH columnKey="status" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.status}>Status</ResizableTH>
-              <ResizableTH columnKey="type" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.type}>Type</ResizableTH>
               <ResizableTH columnKey="category" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.category}>Category</ResizableTH>
+              <ResizableTH columnKey="subCategory" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.subCategory}>SubCategory</ResizableTH>
               <ResizableTH columnKey="created" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.created}>Created</ResizableTH>
               <ResizableTH columnKey="actions" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.actions}>Actions</ResizableTH>
             </tr>
@@ -293,8 +297,8 @@ export default function Content() {
                         {row.status || "PENDING"}
                       </span>
                     </td>
-                    <td>{row.type || "—"}</td>
                     <td>{row.category || "—"}</td>
+                    <td>{row.sub_category || "—"}</td>
                     <td>{formatDate(row.created)}</td>
 
                     <td>
@@ -329,8 +333,8 @@ export default function Content() {
                             <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} />
                             <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} />
                             <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} />
-                            <input value={editForm.type} onChange={e => handleChange("type", e.target.value)} />
                             <input value={editForm.category} onChange={e => handleChange("category", e.target.value)} />
+                            <input value={editForm.subCategory} onChange={e => handleChange("subCategory", e.target.value)} />
                           </div>
                         )}
                       </td>

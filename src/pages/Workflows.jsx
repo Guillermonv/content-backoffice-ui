@@ -26,9 +26,6 @@ const startResize = (th) => (e) => {
   document.addEventListener("mouseup", onMouseUp)
 }
 
-// ======================
-// Resizable TH component
-// ======================
 const ResizableTH = ({ children, className, style }) => (
   <th
     className={className}
@@ -61,17 +58,16 @@ export default function Workflows() {
   const [editForm, setEditForm] = useState({
     Name: "",
     Description: "",
+    Enabled: false,
   })
 
   const [creating, setCreating] = useState(false)
   const [createForm, setCreateForm] = useState({
     Name: "",
     Description: "",
+    Enabled: true,
   })
 
-  // ======================
-  // Load workflows
-  // ======================
   useEffect(() => {
     loadWorkflows()
   }, [])
@@ -86,6 +82,31 @@ export default function Workflows() {
   }
 
   // ======================
+  // Toggle Enabled
+  // ======================
+  const toggleEnabled = async (w) => {
+    const newValue = !w.Enabled
+
+    // Optimistic update
+    setWorkflows((prev) =>
+      prev.map((item) =>
+        item.ID === w.ID ? { ...item, Enabled: newValue } : item
+      )
+    )
+
+    await fetch(`${API_BASE_URL}/workflows/${w.ID}/enabled`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        enabled: newValue,
+      }),
+    })
+  }
+
+  // ======================
   // Edit
   // ======================
   const startEdit = (w) => {
@@ -93,12 +114,11 @@ export default function Workflows() {
     setEditForm({
       Name: w.Name || "",
       Description: w.Description || "",
+      Enabled: w.Enabled || false,
     })
   }
 
-  const cancelEdit = () => {
-    setEditingId(null)
-  }
+  const cancelEdit = () => setEditingId(null)
 
   const saveEdit = async (id) => {
     await fetch(`${API_BASE_URL}/workflows/${id}`, {
@@ -110,6 +130,7 @@ export default function Workflows() {
       body: JSON.stringify({
         Name: editForm.Name,
         Description: editForm.Description,
+        Enabled: editForm.Enabled,
       }),
     })
 
@@ -122,12 +143,10 @@ export default function Workflows() {
   // ======================
   const startCreate = () => {
     setCreating(true)
-    setCreateForm({ Name: "", Description: "" })
+    setCreateForm({ Name: "", Description: "", Enabled: true })
   }
 
-  const cancelCreate = () => {
-    setCreating(false)
-  }
+  const cancelCreate = () => setCreating(false)
 
   const saveCreate = async () => {
     if (!createForm.Name) return
@@ -138,10 +157,7 @@ export default function Workflows() {
         Authorization: `Bearer ${API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        Name: createForm.Name,
-        Description: createForm.Description,
-      }),
+      body: JSON.stringify(createForm),
     })
 
     await loadWorkflows()
@@ -167,9 +183,6 @@ export default function Workflows() {
 
   return (
     <div>
-      {/* ====================== */}
-      {/* Header */}
-      {/* ====================== */}
       <div className="page-header">
         <h1>Workflows</h1>
         {!creating && (
@@ -181,9 +194,6 @@ export default function Workflows() {
         <br />
       </div>
 
-      {/* ====================== */}
-      {/* Create inline */}
-      {/* ====================== */}
       {creating && (
         <div className="editor" style={{ marginBottom: "1rem" }}>
           <label>Name</label>
@@ -198,12 +208,20 @@ export default function Workflows() {
           <input
             value={createForm.Description}
             onChange={(e) =>
-              setCreateForm({
-                ...createForm,
-                Description: e.target.value,
-              })
+              setCreateForm({ ...createForm, Description: e.target.value })
             }
           />
+
+          <label>
+            <input
+              type="checkbox"
+              checked={createForm.Enabled}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, Enabled: e.target.checked })
+              }
+            />
+            Enabled
+          </label>
 
           <div>
             <button onClick={saveCreate} className="btn-icon success">
@@ -216,27 +234,14 @@ export default function Workflows() {
         </div>
       )}
 
-      {/* ====================== */}
-      {/* Table */}
-      {/* ====================== */}
       <table className="table">
         <thead>
           <tr>
-            <ResizableTH className="col-id" style={{ width: "70px" }}>
-              ID
-            </ResizableTH>
-
-            <ResizableTH className="col-name" style={{ width: "180px" }}>
-              Name
-            </ResizableTH>
-
-            <ResizableTH className="col-name" style={{ width: "420px" }}>
-              Description
-            </ResizableTH>
-
-            <ResizableTH className="col-order" style={{ width: "130px" }}>
-              Actions
-            </ResizableTH>
+            <ResizableTH style={{ width: "70px" }}>ID</ResizableTH>
+            <ResizableTH style={{ width: "180px" }}>Name</ResizableTH>
+            <ResizableTH style={{ width: "420px" }}>Description</ResizableTH>
+            <ResizableTH style={{ width: "150px" }}>Status</ResizableTH>
+            <ResizableTH style={{ width: "130px" }}>Actions</ResizableTH>
           </tr>
         </thead>
 
@@ -246,17 +251,14 @@ export default function Workflows() {
 
             return (
               <tr key={w.ID} className={editing ? "active" : ""}>
-                <td className="col-id">{w.ID}</td>
+                <td>{w.ID}</td>
 
-                <td className="col-name">
+                <td>
                   {editing ? (
                     <input
                       value={editForm.Name}
                       onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          Name: e.target.value,
-                        })
+                        setEditForm({ ...editForm, Name: e.target.value })
                       }
                     />
                   ) : (
@@ -264,7 +266,7 @@ export default function Workflows() {
                   )}
                 </td>
 
-                <td className="col-name">
+                <td>
                   {editing ? (
                     <input
                       value={editForm.Description}
@@ -280,13 +282,52 @@ export default function Workflows() {
                   )}
                 </td>
 
-                <td className="col-order">
+                <td>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <span
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        background: w.Enabled ? "#e6f7ed" : "#fdeaea",
+                        color: w.Enabled ? "#1f9254" : "#b42318",
+                      }}
+                    >
+                      {w.Enabled ? "Enabled" : "Disabled"}
+                    </span>
+
+                    {!editing && (
+                      <button
+                        onClick={() => toggleEnabled(w)}
+                        className="btn-icon"
+                        title="Toggle status"
+                      >
+                        🔄
+                      </button>
+                    )}
+
+                    {editing && (
+                      <input
+                        type="checkbox"
+                        checked={editForm.Enabled}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            Enabled: e.target.checked,
+                          })
+                        }
+                      />
+                    )}
+                  </div>
+                </td>
+
+                <td>
                   {!editing ? (
                     <>
                       <button
                         onClick={() => startEdit(w)}
                         className="btn-icon"
-                        title="Edit"
                       >
                         ✏️
                       </button>
@@ -294,7 +335,6 @@ export default function Workflows() {
                       <button
                         onClick={() => deleteWorkflow(w.ID)}
                         className="btn-icon danger"
-                        title="Delete"
                       >
                         🗑️
                       </button>
@@ -304,7 +344,6 @@ export default function Workflows() {
                       <button
                         onClick={() => saveEdit(w.ID)}
                         className="btn-icon success"
-                        title="Save"
                       >
                         ✔️
                       </button>
@@ -312,7 +351,6 @@ export default function Workflows() {
                       <button
                         onClick={cancelEdit}
                         className="btn-icon"
-                        title="Cancel"
                       >
                         ✖️
                       </button>
