@@ -3,6 +3,29 @@ import { useEffect, useState } from "react"
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 const API_TOKEN = import.meta.env.VITE_API_TOKEN
 
+const startResize = (th) => (e) => {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = th.offsetWidth
+  const onMouseMove = (e) => {
+    const newWidth = Math.max(60, startWidth + (e.clientX - startX))
+    th.style.width = `${newWidth}px`
+  }
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
+  }
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
+}
+
+const ResizableTH = ({ children, style }) => (
+  <th style={style}>
+    {children}
+    <div className="col-resizer" onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)} />
+  </th>
+)
+
 export default function Agents() {
   const [agents, setAgents] = useState([])
   const [editingId, setEditingId] = useState(null)
@@ -120,22 +143,16 @@ export default function Agents() {
       {/* Header */}
       {/* ====================== */}
       <div className="page-header">
-  <h1>Agents</h1>
-  {!creating && (
-    <button onClick={startCreate} className="btn-primary">
-      + Add agent
-    </button>
-    
-  )}
-<br></br><br></br>
+        <h1>Agents</h1>
+        {!creating && (
+          <button onClick={startCreate} className="btn-primary">
+            + Add agent
+          </button>
+        )}
+      </div>
 
-</div>
-
-      {/* ====================== */}
-      {/* Create form */}
-      {/* ====================== */}
       {creating && (
-        <div className="editor" style={{ marginBottom: "1rem" }}>
+        <div className="editor">
           <label>Provider</label>
           <input
             value={createForm.Provider}
@@ -169,10 +186,10 @@ export default function Agents() {
       <table className="table">
         <thead>
           <tr>
-            <th className="col-id">ID</th>
-            <th className="col-name">Provider</th>
-            <th className="col-name">Secret</th>
-            <th className="col-order">Actions</th>
+            <ResizableTH style={{ width: "80px" }}>ID</ResizableTH>
+            <ResizableTH style={{ width: "200px" }}>Provider</ResizableTH>
+            <ResizableTH style={{ width: "200px" }}>Secret</ResizableTH>
+            <ResizableTH style={{ width: "100px" }}>Actions</ResizableTH>
           </tr>
         </thead>
 

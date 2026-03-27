@@ -3,6 +3,29 @@ import { useEffect, useState, Fragment } from "react"
 const API = import.meta.env.VITE_API_BASE_URL
 const TOKEN = import.meta.env.VITE_API_TOKEN
 
+const startResize = (th) => (e) => {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = th.offsetWidth
+  const onMouseMove = (e) => {
+    const newWidth = Math.max(60, startWidth + (e.clientX - startX))
+    th.style.width = `${newWidth}px`
+  }
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
+  }
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
+}
+
+const ResizableTH = ({ children, style }) => (
+  <th style={style}>
+    {children}
+    <div className="col-resizer" onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)} />
+  </th>
+)
+
 export default function Steps() {
   const [steps, setSteps] = useState([])
   const [agents, setAgents] = useState([])
@@ -275,14 +298,14 @@ export default function Steps() {
       <table className="table">
         <thead>
           <tr>
-            <th style={{ width: 40 }} />
-            <th style={{ width: 80 }}>ID</th>
-            <th>Name</th>
-            <th style={{ width: 180 }}>Operation</th>
-            <th style={{ width: 80 }}>Order</th>
-            <th style={{ width: 200 }}>Workflow</th> {/* NEW */}
-            <th style={{ width: 200 }}>Agent</th>
-            <th style={{ width: 120 }} />
+            <th style={{ width: "40px" }} />
+            <ResizableTH style={{ width: "80px" }}>ID</ResizableTH>
+            <ResizableTH style={{ width: "180px" }}>Name</ResizableTH>
+            <ResizableTH style={{ width: "180px" }}>Operation</ResizableTH>
+            <ResizableTH style={{ width: "80px" }}>Order</ResizableTH>
+            <ResizableTH style={{ width: "200px" }}>Workflow</ResizableTH>
+            <ResizableTH style={{ width: "200px" }}>Agent</ResizableTH>
+            <ResizableTH style={{ width: "120px" }}>Actions</ResizableTH>
           </tr>
         </thead>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, Fragment } from "react"
+import React, { useEffect, useState, Fragment } from "react"
 
 const API = import.meta.env.VITE_API_BASE_URL
 const TOKEN = import.meta.env.VITE_API_TOKEN
@@ -17,43 +17,28 @@ const formatDate = d => {
 }
 
 /* ================= RESIZABLE ================= */
-const ResizableTH = ({ children, columnKey, widths, setWidths, defaultWidth }) => {
-  const ref = useRef(null)
-
-  const startResize = e => {
-    e.preventDefault()
-    const startX = e.clientX
-    const startWidth = ref.current.offsetWidth
-
-    document.body.style.cursor = "col-resize"
-    document.body.style.userSelect = "none"
-
-    const onMouseMove = e => {
-      const newWidth = Math.max(80, startWidth + (e.clientX - startX))
-      setWidths(prev => ({ ...prev, [columnKey]: newWidth }))
-    }
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove)
-      document.removeEventListener("mouseup", onMouseUp)
-      document.body.style.cursor = "default"
-      document.body.style.userSelect = "auto"
-    }
-
-    document.addEventListener("mousemove", onMouseMove)
-    document.addEventListener("mouseup", onMouseUp)
+const startResize = (th) => (e) => {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = th.offsetWidth
+  const onMouseMove = (e) => {
+    const newWidth = Math.max(60, startWidth + (e.clientX - startX))
+    th.style.width = `${newWidth}px`
   }
-
-  return (
-    <th
-      ref={ref}
-      style={{ width: widths[columnKey] || defaultWidth, minWidth: 80 }}
-    >
-      {children}
-      <div className="col-resizer" onMouseDown={startResize} />
-    </th>
-  )
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
+  }
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
 }
+
+const ResizableTH = ({ children, style }) => (
+  <th style={style}>
+    {children}
+    <div className="col-resizer" onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)} />
+  </th>
+)
 
 export default function Content() {
 
@@ -74,19 +59,6 @@ export default function Content() {
   const [categoryFilter, setCategoryFilter] = useState("")
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
-
-  const [widths, setWidths] = useState({})
-
-  const defaultWidths = {
-    id: 90,
-    execution: 120,
-    title: 300,
-    status: 120,
-    category: 150,
-    subCategory: 150,
-    created: 180,
-    actions: 160
-  }
 
   const toggleExpand = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
@@ -239,7 +211,7 @@ export default function Content() {
           <select
             value={limit}
             onChange={e => { setLimit(Number(e.target.value)); setPage(1) }}
-            style={{ width: 60, height: 32 }}
+            className="page-select"
           >
             <option value={10}>10</option>
             <option value={50}>50</option>
@@ -251,7 +223,7 @@ export default function Content() {
           <button className="btn-primary" onClick={goNext} disabled={page === totalPages}>›</button>
           <button className="btn-primary" onClick={goLast} disabled={page === totalPages}>»</button>
 
-          <span className="page-info" style={{ marginLeft: 16 }}>
+          <span className="page-info">
             {page} / {totalPages}
           </span>
         </div>
@@ -264,15 +236,15 @@ export default function Content() {
         <table className="table">
           <thead>
             <tr>
-              <th style={{ width: 40 }} />
-              <ResizableTH columnKey="id" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.id}>ID</ResizableTH>
-              <ResizableTH columnKey="execution" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.execution}>Execution</ResizableTH>
-              <ResizableTH columnKey="title" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.title}>Title</ResizableTH>
-              <ResizableTH columnKey="status" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.status}>Status</ResizableTH>
-              <ResizableTH columnKey="category" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.category}>Category</ResizableTH>
-              <ResizableTH columnKey="subCategory" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.subCategory}>SubCategory</ResizableTH>
-              <ResizableTH columnKey="created" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.created}>Created</ResizableTH>
-              <ResizableTH columnKey="actions" widths={widths} setWidths={setWidths} defaultWidth={defaultWidths.actions}>Actions</ResizableTH>
+              <th style={{ width: "40px" }} />
+              <ResizableTH style={{ width: "90px" }}>ID</ResizableTH>
+              <ResizableTH style={{ width: "120px" }}>Execution</ResizableTH>
+              <ResizableTH style={{ width: "300px" }}>Title</ResizableTH>
+              <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
+              <ResizableTH style={{ width: "150px" }}>Category</ResizableTH>
+              <ResizableTH style={{ width: "150px" }}>SubCategory</ResizableTH>
+              <ResizableTH style={{ width: "180px" }}>Created</ResizableTH>
+              <ResizableTH style={{ width: "160px" }}>Actions</ResizableTH>
             </tr>
           </thead>
 

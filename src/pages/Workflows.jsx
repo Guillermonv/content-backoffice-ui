@@ -26,28 +26,10 @@ const startResize = (th) => (e) => {
   document.addEventListener("mouseup", onMouseUp)
 }
 
-const ResizableTH = ({ children, className, style }) => (
-  <th
-    className={className}
-    style={{
-      position: "relative",
-      whiteSpace: "nowrap",
-      ...style,
-    }}
-  >
+const ResizableTH = ({ children, style }) => (
+  <th style={style}>
     {children}
-    <div
-      onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)}
-      style={{
-        position: "absolute",
-        right: 0,
-        top: 0,
-        width: "6px",
-        height: "100%",
-        cursor: "col-resize",
-        userSelect: "none",
-      }}
-    />
+    <div className="col-resizer" onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)} />
   </th>
 )
 
@@ -190,12 +172,10 @@ export default function Workflows() {
             + Add workflow
           </button>
         )}
-        <br />
-        <br />
       </div>
 
       {creating && (
-        <div className="editor" style={{ marginBottom: "1rem" }}>
+        <div className="editor">
           <label>Name</label>
           <input
             value={createForm.Name}
@@ -283,17 +263,8 @@ export default function Workflows() {
                 </td>
 
                 <td>
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    <span
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: "20px",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                        background: w.Enabled ? "#e6f7ed" : "#fdeaea",
-                        color: w.Enabled ? "#1f9254" : "#b42318",
-                      }}
-                    >
+                  <div className="cell-center">
+                    <span className={w.Enabled ? "badge-enabled" : "badge-disabled"}>
                       {w.Enabled ? "Enabled" : "Disabled"}
                     </span>
 

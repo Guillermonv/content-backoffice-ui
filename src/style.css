@@ -48,20 +48,27 @@ body {
 }
 
 /* ======================
-   Steps header
+   Page / Section headers
 ====================== */
+.page-header,
 .steps-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-.steps-header-left,
-.steps-header-center,
-.steps-header-right {
+.steps-header-left {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.header-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ======================
@@ -69,7 +76,7 @@ body {
 ====================== */
 .btn-primary {
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px;
   background: #2563eb;
   color: white;
   border: none;
@@ -118,7 +125,46 @@ body {
 }
 
 /* ======================
-   Table (Professional)
+   Page size select
+====================== */
+.page-select {
+  width: 60px;
+  height: 32px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.875rem;
+}
+
+/* ======================
+   Filter input
+====================== */
+.filter-input {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #dcdcdc;
+}
+
+/* ======================
+   Pagination
+====================== */
+.pagination-box {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-info {
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+/* ======================
+   Table
 ====================== */
 .table {
   width: 100%;
@@ -130,7 +176,6 @@ body {
   border: 1px solid #cbd5e1;
 }
 
-/* ===== Header ===== */
 .table thead {
   background: #0f172a;
 }
@@ -143,11 +188,9 @@ body {
   color: #e5e7eb;
   text-transform: uppercase;
   text-align: left;
-
-  /* 👇 white borders */
+  white-space: nowrap;
   border-bottom: 2px solid #ffffff;
   border-right: 1px solid #ffffff;
-
   user-select: none;
 }
 
@@ -155,7 +198,6 @@ body {
   border-right: none;
 }
 
-/* ===== Cells ===== */
 .table td {
   padding: 12px 14px;
   text-align: left;
@@ -174,7 +216,6 @@ body {
   border-bottom: none;
 }
 
-/* ===== Rows ===== */
 .table tbody tr {
   transition: background 0.15s ease;
   cursor: pointer;
@@ -188,26 +229,8 @@ body {
   background: #e0e7ff;
 }
 
-/* ======================
-   Column widths
-====================== */
-.col-id {
-  width: 80px;
-}
-
-.col-order {
-  width: 100px;
-  text-align: center;
-}
-
-.col-agent {
-  width: 140px;
-}
-
-/* Workflow column */
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 280px;
+.table tbody tr.editing td {
+  background: #fffbeb;
 }
 
 /* ======================
@@ -220,6 +243,7 @@ body {
   width: 6px;
   height: 100%;
   cursor: col-resize;
+  user-select: none;
 }
 
 .col-resizer:hover {
@@ -227,8 +251,27 @@ body {
 }
 
 /* ======================
-   Workflow badge
+   Status badges
 ====================== */
+.status {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.status-green {
+  color: #1f9d55;
+}
+
+.status-red {
+  color: #e02424;
+}
+
+.status-yellow {
+  color: #d97706;
+}
+
 .badge-workflow {
   display: inline-flex;
   align-items: center;
@@ -242,6 +285,35 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.badge-enabled,
+.badge-disabled {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-enabled {
+  background: #e6f7ed;
+  color: #1f9254;
+}
+
+.badge-disabled {
+  background: #fdeaea;
+  color: #b42318;
+}
+
+/* ======================
+   Cell center
+====================== */
+.cell-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
 }
 
 /* ======================
@@ -269,91 +341,7 @@ body {
 }
 
 /* ======================
-   Editor
-====================== */
-.editor {
-  margin-top: 2rem;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border: 1px solid #cbd5e1;
-}
-
-.editor h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.editor input,
-.editor textarea,
-.editor select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #cbd5e1;
-  font-family: inherit;
-}
-
-.editor input:focus,
-.editor textarea:focus,
-.editor select:focus {
-  outline: none;
-  border-color: #2563eb;
-}
-
-/* ======================
-   Save checkmark
-====================== */
-.saved-check {
-  color: #22c55e;
-  font-size: 1.2rem;
-  animation: pop 0.2s ease-in-out;
-}
-
-@keyframes pop {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.status {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-}
-
-.status-green {
-  color: #1f9d55; /* DONE */
-}
-
-.status-red {
-  color: #e02424; /* ERROR */
-}
-
-.status-yellow {
-  color: #d97706; /* TODO / RUNNING / PENDING */
-}
-
-
-.cell-center {
-  display: flex;
-  align-items: center;      /* vertical */
-  justify-content: center;  /* horizontal */
-  height: 100%;
-  gap: 8px;
-}
-
-/* ======================
-   Expand / Collapse all
+   Expand / Collapse button
 ====================== */
 .btn-expand {
   width: 36px;
@@ -384,49 +372,95 @@ body {
   transform: scale(0.95);
 }
 
+/* ======================
+   Execution expanded rows
+====================== */
 .execution-expanded.indent-only {
-  padding: 0 0 0 48px;   /* indent */
-  background: #fafbff;  /* sutil separación */
+  padding: 0 0 0 48px;
+  background: #fafbff;
 }
 
 .execution-expanded.indent-bar-deep {
-  padding: 12px 0 16px 72px; /* ↑ espacio vertical + indent */
+  padding: 12px 0 16px 72px;
   background: #fafbff;
   border-left: 3px solid #e0e4ff;
 }
 
-.steps-header {
+/* ======================
+   Editor / Form
+====================== */
+.editor {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid #cbd5e1;
+  margin: 1rem 0;
 }
 
-.filter-input {
-  height: 38px;
-  padding: 0 12px;
-  font-size: 14px;
+.editor h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editor input,
+.editor textarea,
+.editor select {
+  padding: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #dcdcdc;
-  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  font-family: inherit;
 }
 
-.btn-primary {
-  height: 38px;
-  padding: 0 16px;
-  display: inline-flex;
-  align-items: center;
+.editor input:focus,
+.editor textarea:focus,
+.editor select:focus {
+  outline: none;
+  border-color: #2563eb;
 }
 
-.pagination-box {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* Editor inside expanded table row */
+.inner-row td {
+  padding: 0;
+  background: #fafbff;
 }
 
-.page-info {
-  font-size: 14px;
-  font-weight: 500;
+.inner-row .editor {
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
 }
 
+/* ======================
+   Save checkmark
+====================== */
+.saved-check {
+  color: #22c55e;
+  font-size: 1.2rem;
+  animation: pop 0.2s ease-in-out;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ======================
+   Loading
+====================== */
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+}

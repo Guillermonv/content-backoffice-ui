@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState } from "react"
 
 const API = import.meta.env.VITE_API_BASE_URL
 const TOKEN = import.meta.env.VITE_API_TOKEN
@@ -20,43 +20,28 @@ const CollapseAllIcon = () => <span style={{ fontSize: 18 }}>⤴</span>
 /* =====================
    Resizable TH
 ====================== */
-const ResizableTH = ({ children, columnKey, widths, setWidths, defaultWidth }) => {
-  const ref = useRef(null)
-
-  const startResize = e => {
-    e.preventDefault()
-    const startX = e.clientX
-    const startWidth = ref.current.offsetWidth
-
-    document.body.style.cursor = "col-resize"
-    document.body.style.userSelect = "none"
-
-    const onMouseMove = e => {
-      const newWidth = Math.max(80, startWidth + (e.clientX - startX))
-      setWidths(prev => ({ ...prev, [columnKey]: newWidth }))
-    }
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove)
-      document.removeEventListener("mouseup", onMouseUp)
-      document.body.style.cursor = "default"
-      document.body.style.userSelect = "auto"
-    }
-
-    document.addEventListener("mousemove", onMouseMove)
-    document.addEventListener("mouseup", onMouseUp)
+const startResize = (th) => (e) => {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = th.offsetWidth
+  const onMouseMove = (e) => {
+    const newWidth = Math.max(60, startWidth + (e.clientX - startX))
+    th.style.width = `${newWidth}px`
   }
-
-  return (
-    <th
-      ref={ref}
-      style={{ width: widths[columnKey] || defaultWidth, minWidth: 80 }}
-    >
-      {children}
-      <div className="col-resizer" onMouseDown={startResize} />
-    </th>
-  )
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
+  }
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
 }
+
+const ResizableTH = ({ children, style }) => (
+  <th style={style}>
+    {children}
+    <div className="col-resizer" onMouseDown={(e) => startResize(e.currentTarget.parentElement)(e)} />
+  </th>
+)
 
 export default function Execution() {
   const [executions, setExecutions] = useState([])
@@ -75,24 +60,6 @@ export default function Execution() {
 
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
-
-  const [mainWidths, setMainWidths] = useState({})
-  const [nestedWidths, setNestedWidths] = useState({})
-
-  const defaultMain = {
-    execution: 120,
-    status: 120,
-    workflow: 260,
-    description: 350,
-    created: 200
-  }
-
-  const defaultNested = {
-    stepid: 100,
-    name: 200,
-    status: 120,
-    output: 400
-  }
 
   const toggle = id =>
     setExpanded(e => ({ ...e, [id]: !e[id] }))
@@ -242,7 +209,7 @@ export default function Execution() {
               setPageSize(Number(e.target.value))
               setPage(1)
             }}
-            style={{ width: 60, height: 32, textAlign: "center" }}
+            className="page-select"
           >
             <option value={10}>10</option>
             <option value={50}>50</option>
@@ -254,7 +221,7 @@ export default function Execution() {
           <button className="btn-primary" onClick={goNext} disabled={page === totalPages}>›</button>
           <button className="btn-primary" onClick={goLast} disabled={page === totalPages}>»</button>
 
-          <span className="page-info" style={{ marginLeft: 16 }}>
+          <span className="page-info">
             {page} / {totalPages}
           </span>
         </div>
@@ -263,12 +230,12 @@ export default function Execution() {
       <table className="table">
         <thead>
           <tr>
-            <th style={{ width: 40 }} />
-            <ResizableTH columnKey="execution" widths={mainWidths} setWidths={setMainWidths} defaultWidth={defaultMain.execution}>Execution</ResizableTH>
-            <ResizableTH columnKey="status" widths={mainWidths} setWidths={setMainWidths} defaultWidth={defaultMain.status}>Status</ResizableTH>
-            <ResizableTH columnKey="workflow" widths={mainWidths} setWidths={setMainWidths} defaultWidth={defaultMain.workflow}>Workflow</ResizableTH>
-            <ResizableTH columnKey="description" widths={mainWidths} setWidths={setMainWidths} defaultWidth={defaultMain.description}>Description</ResizableTH>
-            <ResizableTH columnKey="created" widths={mainWidths} setWidths={setMainWidths} defaultWidth={defaultMain.created}>Created</ResizableTH>
+            <th style={{ width: "40px" }} />
+            <ResizableTH style={{ width: "120px" }}>Execution</ResizableTH>
+            <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
+            <ResizableTH style={{ width: "260px" }}>Workflow</ResizableTH>
+            <ResizableTH style={{ width: "350px" }}>Description</ResizableTH>
+            <ResizableTH style={{ width: "200px" }}>Created</ResizableTH>
           </tr>
         </thead>
 
@@ -309,10 +276,10 @@ export default function Execution() {
                       <table className="table">
                         <thead>
                           <tr>
-                            <ResizableTH columnKey="stepid" widths={nestedWidths} setWidths={setNestedWidths} defaultWidth={defaultNested.stepid}>Step ID</ResizableTH>
-                            <ResizableTH columnKey="name" widths={nestedWidths} setWidths={setNestedWidths} defaultWidth={defaultNested.name}>Name</ResizableTH>
-                            <ResizableTH columnKey="status" widths={nestedWidths} setWidths={setNestedWidths} defaultWidth={defaultNested.status}>Status</ResizableTH>
-                            <ResizableTH columnKey="output" widths={nestedWidths} setWidths={setNestedWidths} defaultWidth={defaultNested.output}>Output</ResizableTH>
+                            <ResizableTH style={{ width: "100px" }}>Step ID</ResizableTH>
+                            <ResizableTH style={{ width: "200px" }}>Name</ResizableTH>
+                            <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
+                            <ResizableTH style={{ width: "400px" }}>Output</ResizableTH>
                           </tr>
                         </thead>
                         <tbody>
