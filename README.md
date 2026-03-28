@@ -137,4 +137,15 @@ docs/screenshots/
   content-review.png
 ```
 
-To capture them, run `npm run dev` and take a screenshot of each page at 1440px viewport width.
+To regenerate them, run `npm run dev` and execute:
+
+```bash
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+OUT="docs/screenshots"
+for page in workflows agents steps executions; do
+  "$CHROME" --headless --disable-gpu --window-size=1440,900 \
+    --screenshot="$OUT/$page.png" "http://localhost:5173/$page"
+done
+"$CHROME" --headless --disable-gpu --window-size=1440,900 \
+  --screenshot="$OUT/content-review.png" "http://localhost:5173/contentReview"
+```
