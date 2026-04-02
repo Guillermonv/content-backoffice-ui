@@ -1,7 +1,7 @@
 import { useEffect, useState, Fragment } from "react"
+import { useAuth } from "../context/AuthContext"
 
 const API = import.meta.env.VITE_API_BASE_URL
-const getToken = () => localStorage.getItem("token")
 
 const startResize = (th) => (e) => {
   e.preventDefault()
@@ -27,6 +27,7 @@ const ResizableTH = ({ children, style }) => (
 )
 
 export default function Steps() {
+  const { apiFetch } = useAuth()
   const [steps, setSteps] = useState([])
   const [agents, setAgents] = useState([])
   const [workflows, setWorkflows] = useState([])
@@ -50,16 +51,14 @@ export default function Steps() {
   ====================== */
 
   const loadSteps = async () => {
-    const res = await fetch(`${API}/steps`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    const res = await apiFetch(`${API}/steps`)
+    if (!res) return
     setSteps(await res.json())
   }
 
   const loadAgents = async () => {
-    const res = await fetch(`${API}/agents`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    const res = await apiFetch(`${API}/agents`)
+    if (!res) return
     const data = await res.json()
 
     setAgents(
@@ -71,9 +70,8 @@ export default function Steps() {
   }
 
   const loadWorkflows = async () => {
-    const res = await fetch(`${API}/workflows`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    const res = await apiFetch(`${API}/workflows`)
+    if (!res) return
     const data = await res.json()
 
     setWorkflows(
@@ -130,12 +128,9 @@ export default function Steps() {
   }
 
   const saveEdit = async () => {
-    await fetch(`${API}/steps/${editForm.id}`, {
+    await apiFetch(`${API}/steps/${editForm.id}`, {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ID: editForm.id,
         Name: editForm.name,
@@ -152,12 +147,9 @@ export default function Steps() {
   }
 
   const createStep = async () => {
-    await fetch(`${API}/steps`, {
+    await apiFetch(`${API}/steps`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         Name: createForm.name,
         OrderIndex: createForm.orderIndex,
@@ -186,10 +178,7 @@ export default function Steps() {
   const remove = async id => {
     if (!window.confirm("Delete this step?")) return
 
-    await fetch(`${API}/steps/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    await apiFetch(`${API}/steps/${id}`, { method: "DELETE" })
 
     loadSteps()
   }

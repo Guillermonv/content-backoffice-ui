@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const getToken = () => localStorage.getItem("token")
 
 const startResize = (th) => (e) => {
   e.preventDefault()
@@ -27,6 +27,7 @@ const ResizableTH = ({ children, style }) => (
 )
 
 export default function Agents() {
+  const { apiFetch } = useAuth()
   const [agents, setAgents] = useState([])
   const [editingId, setEditingId] = useState(null)
 
@@ -49,11 +50,8 @@ export default function Agents() {
   }, [])
 
   const loadAgents = async () => {
-    const res = await fetch(`${API_BASE_URL}/agents`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
+    const res = await apiFetch(`${API_BASE_URL}/agents`)
+    if (!res) return
     setAgents(await res.json())
   }
 
@@ -73,12 +71,9 @@ export default function Agents() {
   }
 
   const saveEdit = async (id) => {
-    await fetch(`${API_BASE_URL}/agents/${id}`, {
+    await apiFetch(`${API_BASE_URL}/agents/${id}`, {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         Provider: editForm.Provider,
         Secret: editForm.Secret,
@@ -104,12 +99,9 @@ export default function Agents() {
   const saveCreate = async () => {
     if (!createForm.Provider) return
 
-    await fetch(`${API_BASE_URL}/agents`, {
+    await apiFetch(`${API_BASE_URL}/agents`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         Provider: createForm.Provider,
         Secret: createForm.Secret,
@@ -127,12 +119,7 @@ export default function Agents() {
     const ok = window.confirm("Delete this agent?")
     if (!ok) return
 
-    await fetch(`${API_BASE_URL}/agents/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
+    await apiFetch(`${API_BASE_URL}/agents/${id}`, { method: "DELETE" })
 
     setAgents((prev) => prev.filter((a) => a.ID !== id))
   }

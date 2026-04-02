@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
 
 const API = import.meta.env.VITE_API_BASE_URL
-const getToken = () => localStorage.getItem("token")
 
 const statusClass = status => {
   if (!status) return "status status-yellow"
@@ -44,6 +44,7 @@ const ResizableTH = ({ children, style }) => (
 )
 
 export default function Execution() {
+  const { apiFetch } = useAuth()
   const [executions, setExecutions] = useState([])
   const [expanded, setExpanded] = useState({})
   const [expandedOutput, setExpandedOutput] = useState({})
@@ -80,9 +81,8 @@ export default function Execution() {
   /* ================= LOAD DATA ================= */
 
   const loadWorkflows = async () => {
-    const res = await fetch(`${API}/workflows`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    const res = await apiFetch(`${API}/workflows`)
+    if (!res) return
     const json = await res.json()
     setWorkflows(json)
   }
@@ -105,10 +105,8 @@ export default function Execution() {
       params.append("to", d.toISOString())
     }
 
-    const res = await fetch(
-      `${API}/step-executions-grouped?${params.toString()}`,
-      { headers: { Authorization: `Bearer ${getToken()}` } }
-    )
+    const res = await apiFetch(`${API}/step-executions-grouped?${params.toString()}`)
+    if (!res) return
 
     const json = await res.json()
     setExecutions(json.data)

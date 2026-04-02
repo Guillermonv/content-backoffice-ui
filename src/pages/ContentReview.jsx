@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from "react"
+import { useAuth } from "../context/AuthContext"
 
 const API = import.meta.env.VITE_API_BASE_URL
-const getToken = () => localStorage.getItem("token")
 
 const statusClass = status => {
   if (!status) return "status status-yellow"
@@ -41,7 +41,7 @@ const ResizableTH = ({ children, style }) => (
 )
 
 export default function Content() {
-
+  const { apiFetch } = useAuth()
   const [rows, setRows] = useState([])
   const [expanded, setExpanded] = useState({})
   const [editingId, setEditingId] = useState(null)
@@ -77,10 +77,8 @@ export default function Content() {
     if (fromDate) params.append("from", fromDate)
     if (toDate) params.append("to", toDate)
 
-    const res = await fetch(
-      `${API}/content-reviews?${params.toString()}`,
-      { headers: { Authorization: `Bearer ${getToken()}` } }
-    )
+    const res = await apiFetch(`${API}/content-reviews?${params.toString()}`)
+    if (!res) return
 
     const json = await res.json()
 
@@ -101,6 +99,7 @@ export default function Content() {
     setEditingId(row.id)
     setEditForm({
       title: row.title || "",
+      slug: row.slug || "",
       short_description: row.short_description || "",
       message: row.message || "",
       status: row.status || "",
@@ -118,12 +117,9 @@ export default function Content() {
     setEditForm(prev => ({ ...prev, [field]: value }))
 
   const saveEdit = async id => {
-    await fetch(`${API}/content-reviews/${id}`, {
+    await apiFetch(`${API}/content-reviews/${id}`, {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editForm)
     })
 
@@ -132,12 +128,9 @@ export default function Content() {
   }
 
   const updateStatus = async (row, status) => {
-    await fetch(`${API}/content-reviews/${row.id}`, {
+    await apiFetch(`${API}/content-reviews/${row.id}`, {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...row, status })
     })
     setRows(prev => prev.map(r => (r.id === row.id ? { ...r, status } : r)))
@@ -145,10 +138,7 @@ export default function Content() {
 
   const deleteRow = async id => {
     if (!window.confirm("Delete this item?")) return
-    await fetch(`${API}/content-reviews/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    await apiFetch(`${API}/content-reviews/${id}`, { method: "DELETE" })
     setRows(r => r.filter(x => x.id !== id))
   }
 
@@ -241,6 +231,7 @@ export default function Content() {
               <ResizableTH style={{ width: "90px" }}>ID</ResizableTH>
               <ResizableTH style={{ width: "120px" }}>Execution</ResizableTH>
               <ResizableTH style={{ width: "300px" }}>Title</ResizableTH>
+              <ResizableTH style={{ width: "200px" }}>Slug</ResizableTH>
               <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
               <ResizableTH style={{ width: "150px" }}>Category</ResizableTH>
               <ResizableTH style={{ width: "150px" }}>SubCategory</ResizableTH>
@@ -265,6 +256,7 @@ export default function Content() {
                     <td>{row.id}</td>
                     <td>{row.execution_id}</td>
                     <td>{row.title}</td>
+                    <td>{row.slug || "—"}</td>
                     <td>
                       <span className={statusClass(row.status)}>
                         {row.status || "PENDING"}
@@ -297,7 +289,7 @@ export default function Content() {
 
                   {open && (
                     <tr>
-                      <td colSpan={9} className="execution-expanded indent-bar-deep">
+                      <td colSpan={10} className="execution-expanded indent-bar-deep">
                         {!editing ? (
                           <>
                             <strong>{row.short_description}</strong>
@@ -306,6 +298,7 @@ export default function Content() {
                         ) : (
                           <div className="editor">
                             <input value={editForm.title} onChange={e => handleChange("title", e.target.value)} />
+                            <input value={editForm.slug} onChange={e => handleChange("slug", e.target.value)} />
                             <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} />
                             <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} />
                             <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} />

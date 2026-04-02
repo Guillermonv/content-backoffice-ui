@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const getToken = () => localStorage.getItem("token")
 
 // ======================
 // Column resize helper
@@ -34,6 +34,7 @@ const ResizableTH = ({ children, style }) => (
 )
 
 export default function Workflows() {
+  const { apiFetch } = useAuth()
   const [workflows, setWorkflows] = useState([])
   const [editingId, setEditingId] = useState(null)
 
@@ -55,11 +56,8 @@ export default function Workflows() {
   }, [])
 
   const loadWorkflows = async () => {
-    const res = await fetch(`${API_BASE_URL}/workflows`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
+    const res = await apiFetch(`${API_BASE_URL}/workflows`)
+    if (!res) return
     setWorkflows(await res.json())
   }
 
@@ -76,15 +74,10 @@ export default function Workflows() {
       )
     )
 
-    await fetch(`${API_BASE_URL}/workflows/${w.ID}/enabled`, {
+    await apiFetch(`${API_BASE_URL}/workflows/${w.ID}/enabled`, {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        enabled: newValue,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: newValue }),
     })
   }
 
@@ -103,12 +96,9 @@ export default function Workflows() {
   const cancelEdit = () => setEditingId(null)
 
   const saveEdit = async (id) => {
-    await fetch(`${API_BASE_URL}/workflows/${id}`, {
+    await apiFetch(`${API_BASE_URL}/workflows/${id}`, {
       method: "PUT",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         Name: editForm.Name,
         Description: editForm.Description,
@@ -133,12 +123,9 @@ export default function Workflows() {
   const saveCreate = async () => {
     if (!createForm.Name) return
 
-    await fetch(`${API_BASE_URL}/workflows`, {
+    await apiFetch(`${API_BASE_URL}/workflows`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(createForm),
     })
 
@@ -153,12 +140,7 @@ export default function Workflows() {
     const ok = window.confirm("Delete this workflow?")
     if (!ok) return
 
-    await fetch(`${API_BASE_URL}/workflows/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    })
+    await apiFetch(`${API_BASE_URL}/workflows/${id}`, { method: "DELETE" })
 
     setWorkflows((prev) => prev.filter((w) => w.ID !== id))
   }
