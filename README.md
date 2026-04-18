@@ -60,7 +60,7 @@ Manage AI agent credentials (provider + secret).
 ### Steps
 Configure workflow steps — operation type, agent, prompt.
 
-![Steps page](docs/screenshots/steps.png)
+<img width="1504" height="522" alt="Screenshot 2026-04-18 at 14 29 43" src="https://github.com/user-attachments/assets/77e1fe52-f206-43a1-b7df-a6c7ce73dfaf" />
 
 **Features**
 - Expandable row shows prompt text
@@ -71,8 +71,8 @@ Configure workflow steps — operation type, agent, prompt.
 
 ### Executions
 View grouped step execution history with status tracking.
+<img width="1499" height="767" alt="Screenshot 2026-04-18 at 14 36 48" src="https://github.com/user-attachments/assets/32959860-86a5-43d7-8224-cdd120b2b7f0" />
 
-![Executions page](docs/screenshots/executions.png)
 
 **Features**
 - Grouped by execution ID — expand to see individual step results
@@ -85,7 +85,8 @@ View grouped step execution history with status tracking.
 ### Content Review
 Review and moderate AI-generated content items.
 
-![Content Review page](docs/screenshots/content-review.png)
+<img width="1474" height="695" alt="Screenshot 2026-04-18 at 14 35 47" src="https://github.com/user-attachments/assets/13e08f16-3692-4e27-a16c-d5bc0ccaaadd" />
+
 
 **Features**
 - Status flow: `PENDING` → ✅ `DONE` → 🚫 `CANCELLED` → ✅ `DONE`
