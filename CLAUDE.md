@@ -189,14 +189,14 @@ Checklist. All items must be checked before marking spec as Done.
 ### 3. Status display
 - Use pill badges (`.status` + `.status-green/red/yellow`) — never plain text for status fields
 - Status color mapping:
-  - `DONE`, `SUCCESS`, `APPROVED` → green
+  - `PUBLISHED`, `SUCCESS`, `APPROVED` → green
   - `ERROR`, `FAILED`, `CANCELLED` → red
   - Everything else (including empty) → yellow / pending
 
 ### 4. ContentReview status flow
-- `PENDING / ERROR / CANCELLED` → show ✅ button → sets status to `DONE`
-- `DONE` → show 🚫 button → sets status to `CANCELLED`
-- Filter dropdown must include: `All Status`, `DONE`, `ERROR`, `PENDING`, `CANCELLED`
+- `PENDING / ERROR / CANCELLED` → show ✅ button → sets status to `PUBLISHED`
+- `PUBLISHED` → show 🚫 button → sets status to `CANCELLED`
+- Filter dropdown must include: `All Status`, `PUBLISHED`, `ERROR`, `PENDING`, `CANCELLED`
 
 ### 5. Pagination
 - Always: `«` first, `‹` prev, `›` next, `»` last + page size select + `page / total` info

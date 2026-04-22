@@ -7,7 +7,7 @@ const statusClass = status => {
   if (!status) return "status status-yellow"
   const s = status.toLowerCase()
   if (["error", "failed", "cancelled"].includes(s)) return "status status-red"
-  if (["done", "success", "approved"].includes(s)) return "status status-green"
+  if (["published", "success", "approved"].includes(s)) return "status status-green"
   return "status status-yellow"
 }
 
@@ -56,7 +56,6 @@ export default function Content() {
   /* FILTERS */
   const [statusFilter, setStatusFilter] = useState("")
   const [executionFilter, setExecutionFilter] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("")
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
 
@@ -73,7 +72,6 @@ export default function Content() {
 
     if (statusFilter) params.append("status", statusFilter)
     if (executionFilter) params.append("execution_id", executionFilter)
-    if (categoryFilter) params.append("category", categoryFilter)
     if (fromDate) params.append("from", fromDate)
     if (toDate) params.append("to", toDate)
 
@@ -92,7 +90,7 @@ export default function Content() {
 
   useEffect(() => {
     load()
-  }, [page, limit, statusFilter, executionFilter, categoryFilter, fromDate, toDate])
+  }, [page, limit, statusFilter, executionFilter, fromDate, toDate])
 
   /* ================= EDIT ================= */
   const startEdit = row => {
@@ -102,9 +100,7 @@ export default function Content() {
       slug: row.slug || "",
       short_description: row.short_description || "",
       message: row.message || "",
-      status: row.status || "",
-      category: row.category || "",
-      subCategory: row.subCategory || ""
+      status: row.status || ""
     })
   }
 
@@ -163,7 +159,7 @@ export default function Content() {
               onChange={e => { setStatusFilter(e.target.value); setPage(1) }}
             >
               <option value="">All Status</option>
-              <option value="DONE">DONE</option>
+              <option value="PUBLISHED">PUBLISHED</option>
               <option value="ERROR">ERROR</option>
               <option value="PENDING">PENDING</option>
               <option value="CANCELLED">CANCELLED</option>
@@ -175,14 +171,6 @@ export default function Content() {
               className="filter-input"
               value={executionFilter}
               onChange={e => { setExecutionFilter(e.target.value); setPage(1) }}
-            />
-
-            <input
-              type="text"
-              placeholder="Category"
-              className="filter-input"
-              value={categoryFilter}
-              onChange={e => { setCategoryFilter(e.target.value); setPage(1) }}
             />
 
           </div>
@@ -233,8 +221,6 @@ export default function Content() {
               <ResizableTH style={{ width: "300px" }}>Title</ResizableTH>
               <ResizableTH style={{ width: "200px" }}>Slug</ResizableTH>
               <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
-              <ResizableTH style={{ width: "150px" }}>Category</ResizableTH>
-              <ResizableTH style={{ width: "150px" }}>SubCategory</ResizableTH>
               <ResizableTH style={{ width: "180px" }}>Created</ResizableTH>
               <ResizableTH style={{ width: "160px" }}>Actions</ResizableTH>
             </tr>
@@ -262,17 +248,15 @@ export default function Content() {
                         {row.status || "PENDING"}
                       </span>
                     </td>
-                    <td>{row.category || "—"}</td>
-                    <td>{row.sub_category || "—"}</td>
                     <td>{formatDate(row.created)}</td>
 
                     <td>
                       {!editing ? (
                         <>
-                          {row.status !== "DONE" && (
-                            <button className="btn-icon success" onClick={() => updateStatus(row, "DONE")}>✅</button>
+                          {row.status !== "PUBLISHED" && (
+                            <button className="btn-icon success" onClick={() => updateStatus(row, "PUBLISHED")}>✅</button>
                           )}
-                          {row.status === "DONE" && (
+                          {row.status === "PUBLISHED" && (
                             <button className="btn-icon danger" onClick={() => updateStatus(row, "CANCELLED")}>🚫</button>
                           )}
                           <button className="btn-icon" onClick={() => startEdit(row)}>✏️</button>
@@ -289,7 +273,7 @@ export default function Content() {
 
                   {open && (
                     <tr>
-                      <td colSpan={10} className="execution-expanded indent-bar-deep">
+                      <td colSpan={8} className="execution-expanded indent-bar-deep">
                         {!editing ? (
                           <>
                             <strong>{row.short_description}</strong>
@@ -302,8 +286,6 @@ export default function Content() {
                             <input value={editForm.short_description} onChange={e => handleChange("short_description", e.target.value)} />
                             <textarea value={editForm.message} onChange={e => handleChange("message", e.target.value)} />
                             <input value={editForm.status} onChange={e => handleChange("status", e.target.value)} />
-                            <input value={editForm.category} onChange={e => handleChange("category", e.target.value)} />
-                            <input value={editForm.subCategory} onChange={e => handleChange("subCategory", e.target.value)} />
                           </div>
                         )}
                       </td>
