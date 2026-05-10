@@ -67,6 +67,7 @@ body {
 .content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2rem 2.5rem;
   min-width: 0;
 }
@@ -846,4 +847,113 @@ h1 {
   background: var(--green-light);
   color: var(--green-text);
   border: 1px solid #bbf7d0;
+}
+
+/* ======================
+   Table wrapper (responsive)
+====================== */
+.table-wrap {
+  overflow-x: auto;
+}
+
+/* ======================
+   Secondary button
+====================== */
+.btn-secondary {
+  height: 30px;
+  padding: 0 12px;
+  background: var(--white);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-secondary:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ======================
+   Modal
+====================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 24px;
+  width: 340px;
+  max-width: 90vw;
+}
+
+.modal h3 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.modal-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.modal-field input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.modal-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--white);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ======================
+   Section button
+====================== */
+.btn-icon.section {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary);
 }

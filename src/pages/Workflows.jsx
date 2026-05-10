@@ -196,6 +196,7 @@ export default function Workflows() {
         </div>
       )}
 
+      <div className="table-wrap">
       <table className="table">
         <thead>
           <tr>
@@ -315,6 +316,7 @@ export default function Workflows() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

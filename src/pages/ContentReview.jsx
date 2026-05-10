@@ -48,6 +48,10 @@ export default function Content() {
   const [editForm, setEditForm] = useState({})
   const [loading, setLoading] = useState(true)
 
+  /* SECTION MODAL */
+  const [sectionModal, setSectionModal] = useState(null)
+  const [sectionValue, setSectionValue] = useState("")
+
   /* PAGINATION */
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
@@ -100,7 +104,8 @@ export default function Content() {
       slug: row.slug || "",
       short_description: row.short_description || "",
       message: row.message || "",
-      status: row.status || ""
+      status: row.status || "",
+      section: row.section ?? 0
     })
   }
 
@@ -130,6 +135,23 @@ export default function Content() {
       body: JSON.stringify({ ...row, status })
     })
     setRows(prev => prev.map(r => (r.id === row.id ? { ...r, status } : r)))
+  }
+
+  const openSectionModal = row => {
+    setSectionModal(row)
+    setSectionValue(row.section ?? "")
+  }
+
+  const saveSection = async () => {
+    const row = sectionModal
+    const section = sectionValue === "" ? 0 : parseInt(sectionValue, 10)
+    await apiFetch(`${API}/content-reviews/${row.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...row, section })
+    })
+    setRows(prev => prev.map(r => (r.id === row.id ? { ...r, section } : r)))
+    setSectionModal(null)
   }
 
   const deleteRow = async id => {
@@ -212,6 +234,7 @@ export default function Content() {
       {loading ? (
         <div className="loading">Loading…</div>
       ) : (
+        <div className="table-wrap">
         <table className="table">
           <thead>
             <tr>
@@ -221,7 +244,8 @@ export default function Content() {
               <ResizableTH style={{ width: "300px" }}>Title</ResizableTH>
               <ResizableTH style={{ width: "200px" }}>Slug</ResizableTH>
               <ResizableTH style={{ width: "120px" }}>Status</ResizableTH>
-              <ResizableTH style={{ width: "180px" }}>Created</ResizableTH>
+              <ResizableTH style={{ width: "160px" }}>Created</ResizableTH>
+              <ResizableTH style={{ width: "80px" }}>Section</ResizableTH>
               <ResizableTH style={{ width: "160px" }}>Actions</ResizableTH>
             </tr>
           </thead>
@@ -249,6 +273,9 @@ export default function Content() {
                       </span>
                     </td>
                     <td>{formatDate(row.created)}</td>
+                    <td style={{ textAlign: "center", fontWeight: 600, color: row.section ? "var(--text)" : "var(--text-muted)" }}>
+                      {row.section || "—"}
+                    </td>
 
                     <td>
                       {!editing ? (
@@ -259,6 +286,7 @@ export default function Content() {
                           {row.status === "PUBLISHED" && (
                             <button className="btn-icon danger" onClick={() => updateStatus(row, "CANCELLED")}>🚫</button>
                           )}
+                          <button className="btn-icon" title="Asignar sección" onClick={() => openSectionModal(row)}>📄</button>
                           <button className="btn-icon" onClick={() => startEdit(row)}>✏️</button>
                           <button className="btn-icon danger" onClick={() => deleteRow(row.id)}>🗑️</button>
                         </>
@@ -273,7 +301,7 @@ export default function Content() {
 
                   {open && (
                     <tr>
-                      <td colSpan={8} className="execution-expanded indent-bar-deep">
+                      <td colSpan={9} className="execution-expanded indent-bar-deep">
                         {!editing ? (
                           <>
                             <strong>{row.short_description}</strong>
@@ -296,6 +324,31 @@ export default function Content() {
             })}
           </tbody>
         </table>
+        </div>
+      )}
+
+      {sectionModal && (
+        <div className="modal-overlay" onClick={() => setSectionModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Asignar sección — #{sectionModal.id}</h3>
+            <div className="modal-field">
+              <label>Número de sección</label>
+              <input
+                autoFocus
+                type="number"
+                min="0"
+                value={sectionValue}
+                onChange={e => setSectionValue(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") saveSection(); if (e.key === "Escape") setSectionModal(null) }}
+                placeholder="ej: 1, 2, 3…"
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setSectionModal(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={saveSection}>Guardar</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

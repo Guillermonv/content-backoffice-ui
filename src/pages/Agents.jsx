@@ -170,6 +170,7 @@ export default function Agents() {
       {/* ====================== */}
       {/* Table */}
       {/* ====================== */}
+      <div className="table-wrap">
       <table className="table">
         <thead>
           <tr>
@@ -266,6 +267,7 @@ export default function Agents() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

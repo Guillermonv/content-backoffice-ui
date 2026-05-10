@@ -284,6 +284,7 @@ export default function Steps() {
         </div>
       )}
 
+      <div className="table-wrap">
       <table className="table">
         <thead>
           <tr>
@@ -459,6 +460,7 @@ export default function Steps() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }
